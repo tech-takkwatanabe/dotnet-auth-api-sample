@@ -1,0 +1,61 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: dotnet_sample_sql_server_db
+    environment:
+      SA_PASSWORD: '${MSSQL_SA_PASSWORD}'
+      ACCEPT_EULA: 'Y'
+      MSSQL_PID: 'Developer'
+    ports:
+      - '1433:1433'
+    volumes:
+      - ./docker/data:/var/opt/mssql
+    healthcheck:
+      test: ['CMD', '/opt/mssql-tools/bin/sqlcmd', '-S', 'localhost', '-U', 'sa', '-P', '${MSSQL_SA_PASSWORD}', '-Q', 'SELECT 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: dotnet_sample_redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - ./docker/redis:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: dotnet_sample_api_backend
+    ports:
+      - '8080:8080'
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: 'Server=db,1433;Database=${DB_NAME};User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True'
+      ConnectionStrings__RedisConnection: 'redis:6379'
+      Jwt__Issuer: 'your-api-issuer'
+      Jwt__Audience: 'your-api-audience'
+      Jwt__Key: 'a_very_long_and_complex_secret_key_for_jwt_signing_at_least_32_characters_long'
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
