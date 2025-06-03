@@ -37,9 +37,9 @@ services:
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__DefaultConnection: 'Server=db,1433;Database=${DB_NAME};User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True'
       ConnectionStrings__RedisConnection: 'redis:6379'
-      Jwt__Issuer: 'your-api-issuer'
-      Jwt__Audience: 'your-api-audience'
-      Jwt__Key: 'a_very_long_and_complex_secret_key_for_jwt_signing_at_least_32_characters_long'
+      Jwt__Issuer: ${JWT_ISSUER}
+      Jwt__Audience: ${JWT_AUDIENCE}
+      Jwt__Key: ${JWT_SECRET}
     networks:
       - app_network
 
