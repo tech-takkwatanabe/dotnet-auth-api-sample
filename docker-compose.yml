@@ -1,6 +1,7 @@
 services:
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
     container_name: dotnet_sample_sql_server_db
     environment:
       SA_PASSWORD: '${MSSQL_SA_PASSWORD}'
@@ -10,11 +11,6 @@ services:
       - '1433:1433'
     volumes:
       - ./docker/data:/var/opt/mssql
-    healthcheck:
-      test: ['CMD', '/opt/mssql-tools/bin/sqlcmd', '-S', 'localhost', '-U', 'sa', '-P', '${MSSQL_SA_PASSWORD}', '-Q', 'SELECT 1']
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - app_network
 
@@ -26,11 +22,6 @@ services:
     volumes:
       - ./docker/redis:/data
     command: redis-server --appendonly yes
-    healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
-      interval: 5s
-      timeout: 5s
-      retries: 5
     networks:
       - app_network
 
@@ -38,6 +29,7 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
+    platform: linux/amd64
     container_name: dotnet_sample_api_backend
     ports:
       - '8080:8080'
@@ -48,11 +40,6 @@ services:
       Jwt__Issuer: 'your-api-issuer'
       Jwt__Audience: 'your-api-audience'
       Jwt__Key: 'a_very_long_and_complex_secret_key_for_jwt_signing_at_least_32_characters_long'
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
     networks:
       - app_network
 
