@@ -1,0 +1,14 @@
+{
+	"editor.formatOnSave": true,
+	"editor.tabSize": 2,
+	"[csharp]": {
+		"editor.defaultFormatter": "ms-dotnettools.csharp"
+	},
+	"csharp.format.enable": true,
+	"editor.codeActionsOnSave": {
+		"source.fixAll": "explicit",
+		"source.organizeImports": "explicit"
+	},
+	"errorLens.enabled": true,
+	"errorLens.messageTemplate": "  ● ${source}: ${message}"
+}
