@@ -35,9 +35,12 @@ services:
     container_name: dotnet_sample_api_backend
     ports:
       - '8080:8080'
+      - '8443:8443'
     environment:
-      ASPNETCORE_URLS: http://+:8080
       ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080;https://+:8443
+      SSL_CERT_PATH: /https/localhost-cert.pem
+      SSL_KEY_PATH: /https/localhost-key.pem
       DB_USER: sa
       DB_PASSWORD: ${MSSQL_SA_PASSWORD}
       DB_NAME: ${DB_NAME}
@@ -46,9 +49,11 @@ services:
       Jwt__Issuer: ${JWT_ISSUER}
       Jwt__Audience: ${JWT_AUDIENCE}
       Jwt__Key: ${JWT_SECRET}
+      NUGET_PACKAGES: /root/.nuget/packages
     volumes:
-      - .:/src
-    command: dotnet watch run --no-hot-reload
+      - .:/src:delegated
+      - nuget-packages:/root/.nuget/packages
+      - ../../.certificate:/https:ro
     networks:
       - app_network
     depends_on:
@@ -60,3 +65,4 @@ networks:
 
 volumes:
   sqldata:
+  nuget-packages:
