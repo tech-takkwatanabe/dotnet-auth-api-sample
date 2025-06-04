@@ -37,11 +37,11 @@ services:
       - '8080:8080'
       - '8443:8443'
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      ASPNETCORE_URLS: http://+:8080;https://+:8443
-      SSL_CERT_PATH: /https/localhost-cert.pem
-      SSL_KEY_PATH: /https/localhost-key.pem
-      DB_USER: sa
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      ASPNETCORE_URLS: ${ASPNETCORE_URLS}
+      SSL_CERT_PATH: ${SSL_CERT_PATH}
+      SSL_KEY_PATH: ${SSL_KEY_PATH}
+      DB_USER: ${DB_USER}
       DB_PASSWORD: ${MSSQL_SA_PASSWORD}
       DB_NAME: ${DB_NAME}
       ConnectionStrings__DefaultConnection: 'Server=db,1433;Database=${DB_NAME};User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True'
