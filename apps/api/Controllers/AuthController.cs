@@ -11,42 +11,47 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(SignUpResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [Consumes("application/json")]
-    public async Task<IActionResult> SignUp([FromBody] SignUpRequest request)
+    public Task<IActionResult> SignUp([FromBody] SignUpRequest request)
     {
-        return Ok(new SignUpResponse("UserName", "hoge@example.com"));
+        // TODO: 実装
+        return Task.FromResult<IActionResult>(Ok(new SignUpResponse("UserName", "hoge@example.com")));
     }
 
     [HttpPost("login")]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [Consumes("application/json")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    public Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        return Ok(new AuthResponse("access_token", "refresh_token"));
+        // TODO: 実装
+        return Task.FromResult<IActionResult>(Ok(new AuthResponse("access_token", "refresh_token")));
     }
 
     [HttpPost("refresh")]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [Consumes("application/json")]
-    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+    public Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
     {
-        return Ok(new AuthResponse("access_token", "refresh_token"));
+        // TODO: 実装
+        return Task.FromResult<IActionResult>(Ok(new AuthResponse("access_token", "refresh_token")));
     }
 
     [HttpPost("logout")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> Logout()
+    public Task<IActionResult> Logout()
     {
-        return Ok(new { message = "ログアウトしました" });
+        // TODO: 実装
+        return Task.FromResult<IActionResult>(Ok(new { message = "Logged out successfully!!" }));
     }
 
     [HttpGet("me")]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> GetCurrentUser()
+    public Task<IActionResult> GetCurrentUser()
     {
-        return Ok(new UserResponse("user_id", "user@example.com", "username"));
+        // TODO: 実装
+        return Task.FromResult<IActionResult>(Ok(new UserResponse("user_id", "user@example.com", "username")));
     }
-} 
+}
