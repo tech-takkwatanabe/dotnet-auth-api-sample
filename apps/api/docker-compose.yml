@@ -38,12 +38,13 @@ services:
       - '8443:8443'
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
-      ASPNETCORE_URLS: ${ASPNETCORE_URLS}
       SSL_CERT_PATH: ${SSL_CERT_PATH}
       SSL_KEY_PATH: ${SSL_KEY_PATH}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${MSSQL_SA_PASSWORD}
       DB_NAME: ${DB_NAME}
+      DOTNET_WATCH_RESTART_ON_RUDE_EDIT: true
+      DOTNET_WATCH_SUPPRESS_HOT_RELOAD: true
       ConnectionStrings__DefaultConnection: 'Server=db,1433;Database=${DB_NAME};User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True'
       ConnectionStrings__RedisConnection: 'redis:6379'
       Jwt__Issuer: ${JWT_ISSUER}
@@ -51,8 +52,8 @@ services:
       Jwt__Key: ${JWT_SECRET}
       NUGET_PACKAGES: /root/.nuget/packages
     volumes:
-      - .:/src:delegated
-      - nuget-packages:/root/.nuget/packages
+      - .:/app:cached
+      - nuget-packages:/root/.nuget/packages:cached
       - ../../.certificate:/https:ro
     networks:
       - app_network
