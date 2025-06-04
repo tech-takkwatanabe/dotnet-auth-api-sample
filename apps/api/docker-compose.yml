@@ -46,9 +46,17 @@ services:
       Jwt__Issuer: ${JWT_ISSUER}
       Jwt__Audience: ${JWT_AUDIENCE}
       Jwt__Key: ${JWT_SECRET}
+    volumes:
+      - .:/src
+    command: dotnet watch run --no-hot-reload
     networks:
       - app_network
+    depends_on:
+      - db
 
 networks:
   app_network:
     driver: bridge
+
+volumes:
+  sqldata:
