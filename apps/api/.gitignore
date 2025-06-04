@@ -3,6 +3,9 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
+docker/data
+docker/redis
+
 # dotenv files
 .env
 
