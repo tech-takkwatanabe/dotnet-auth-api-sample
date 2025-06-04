@@ -1,6 +1,39 @@
-@Api_HostAddress = http://localhost:5170
+@Api_HostAddress = http://localhost:8080
 
 GET {{Api_HostAddress}}/weatherforecast/
 Accept: application/json
+
+### サインアップ
+POST {{Api_HostAddress}}/api/auth/signup
+Content-Type: application/json
+
+{
+    "email": "test@example.com",
+    "password": "Test123!",
+    "username": "testuser"
+}
+
+### ログイン
+POST {{Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "test@example.com",
+    "password": "Test123!"
+}
+
+### リフレッシュトークン
+POST {{Api_HostAddress}}/api/auth/refresh
+Content-Type: application/json
+
+{
+    "refreshToken": "your_refresh_token"
+}
+
+### ログアウト
+POST {{Api_HostAddress}}/api/auth/logout
+
+### 現在のユーザー情報取得
+GET {{Api_HostAddress}}/api/auth/me
 
 ###
