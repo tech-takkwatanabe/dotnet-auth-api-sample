@@ -4,7 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>$(UserSecretsId)</UserSecretsId>
+    <UserSecretsId>$(USER_SECRET_ID)</UserSecretsId>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <Watch>true</Watch>
   </PropertyGroup>
