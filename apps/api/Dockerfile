@@ -1,9 +1,13 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
+
+# Copy csproj and restore dependencies
 COPY ["Api.csproj", "./"]
 RUN dotnet restore "Api.csproj"
+
+# Copy everything else and build
 COPY . .
-RUN dotnet build "Api.csproj" -c Release -o /app/build
+RUN dotnet build "Api.csproj" -c Debug -o /app/build
 
 # dotnet-efツールをインストール
 RUN dotnet tool install --global dotnet-ef
@@ -32,6 +36,5 @@ ENV PATH="$PATH:/root/.dotnet/tools"
 
 COPY --from=publish /app/publish .
 COPY --from=build /src .
-COPY entrypoint.sh ./
-RUN chmod +x entrypoint.sh
-ENTRYPOINT ["./entrypoint.sh"]
+
+ENTRYPOINT ["dotnet", "run", "--project", "Api.csproj"]

@@ -1,28 +1,30 @@
 ﻿{
 	"$schema": "https://json.schemastore.org/launchsettings.json",
+	"iisSettings": {
+		"windowsAuthentication": false,
+		"anonymousAuthentication": true,
+		"iisExpress": {
+			"applicationUrl": "http://localhost:8080",
+			"sslPort": 0
+		}
+	},
 	"profiles": {
 		"http": {
 			"commandName": "Project",
 			"dotnetRunMessages": true,
-			"launchBrowser": false,
-			"applicationUrl": "http://localhost:5170",
+			"launchBrowser": true,
+			"launchUrl": "swagger",
+			"applicationUrl": "http://localhost:8080",
 			"environmentVariables": {
-				"ASPNETCORE_ENVIRONMENT": "Development",
-				"DB_USER": "${DB_USER:-sa}",
-				"DB_PASSWORD": "${DB_PASSWORD:-YourStrong!Passw0rd}",
-				"DB_NAME": "${DB_NAME:-DotnetAuthApiSample}"
+				"ASPNETCORE_ENVIRONMENT": "Development"
 			}
 		},
-		"https": {
-			"commandName": "Project",
-			"dotnetRunMessages": true,
-			"launchBrowser": false,
-			"applicationUrl": "https://localhost:7092;http://localhost:5170",
+		"IIS Express": {
+			"commandName": "IISExpress",
+			"launchBrowser": true,
+			"launchUrl": "swagger",
 			"environmentVariables": {
-				"ASPNETCORE_ENVIRONMENT": "Development",
-				"DB_USER": "${DB_USER:-sa}",
-				"DB_PASSWORD": "${DB_PASSWORD:-YourStrong!Passw0rd}",
-				"DB_NAME": "${DB_NAME:-DotnetAuthApiSample}"
+				"ASPNETCORE_ENVIRONMENT": "Development"
 			}
 		}
 	}
