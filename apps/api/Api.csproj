@@ -7,6 +7,7 @@
     <UserSecretsId>$(USER_SECRET_ID)</UserSecretsId>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <Watch>true</Watch>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <ItemGroup>

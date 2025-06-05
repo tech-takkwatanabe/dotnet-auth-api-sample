@@ -10,5 +10,6 @@
 		"source.organizeImports": "explicit"
 	},
 	"errorLens.enabled": true,
-	"errorLens.messageTemplate": "  ● ${source}: ${message}"
+	"errorLens.messageTemplate": "  ● ${source}: ${message}",
+	"FSharp.suggestGitignore": false
 }
