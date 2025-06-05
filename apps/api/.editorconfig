@@ -12,8 +12,11 @@ trim_trailing_whitespace = false
 insert_final_newline = false
 
 # Avoid "this." and "Me." if not necessary
+[*.{cs,vb}]
 dotnet_style_qualification_for_field = false:warning
 dotnet_style_qualification_for_property = false:warning
 dotnet_style_qualification_for_method = false:warning
 dotnet_style_qualification_for_event = false:warning
 dotnet_diagnostic.IDE0005.severity = none
+dotnet_diagnostic.IDE0090.severity = none
+dotnet_analyzer_diagnostic.category-Style.severity = none
