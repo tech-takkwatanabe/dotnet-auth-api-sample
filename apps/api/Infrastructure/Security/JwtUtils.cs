@@ -84,7 +84,6 @@ namespace Api.Infrastructure.Security
       var key = Encoding.ASCII.GetBytes(_jwtSettings.Key);
       try
       {
-        SecurityToken validatedToken;
         var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
         {
           ValidateIssuerSigningKey = true,
@@ -93,13 +92,13 @@ namespace Api.Infrastructure.Security
           ValidIssuer = _jwtSettings.Issuer,
           ValidateAudience = true,
           ValidAudience = _jwtSettings.Audience,
-          ValidateLifetime = validateLifetime, // true for access token, false for expired token check
-          ClockSkew = TimeSpan.Zero // トークンの有効期限の許容範囲
+          ValidateLifetime = validateLifetime,
+          ClockSkew = TimeSpan.Zero
         }, out SecurityToken validatedToken);
 
         return principal;
       }
-      catch (SecurityTokenException) // Token validation failed (e.g. signature, expired if validateLifetime is true)
+      catch (SecurityTokenException)
       {
         return null;
       }
