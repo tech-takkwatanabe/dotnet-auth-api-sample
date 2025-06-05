@@ -15,7 +15,7 @@ namespace Api.Domain.VOs
       Value = value;
     }
 
-    public static Uuid NewUuid() => Uuid(Guid.NewGuid());
+    public static Uuid NewUuid() => new(Guid.NewGuid());
 
     public override bool Equals(object? obj)
     {
