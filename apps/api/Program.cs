@@ -4,12 +4,14 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Api.Application.Interfaces;
 using Api.Infrastructure.Configuration;
+using Api.Infrastructure.Persistence;
 using Api.Infrastructure.Security;
 using Api.Infrastructure.Settings;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,16 +44,25 @@ builder.WebHost.ConfigureKestrel(options =>
 // .env ファイルから環境変数を読み込む (アプリケーションの早い段階で)
 Env.Load();
 
-// 1. JWT設定を環境変数から読み込むように変更
-builder.Services.AddSingleton(new JwtSettings
-{
-  Key = EnvConfig.GetString("JWT_KEY"),
-  Issuer = EnvConfig.GetString("JWT_ISSUER"),
-  Audience = EnvConfig.GetString("JWT_AUDIENCE"),
-  AccessTokenExpirationSeconds = EnvConfig.GetInt("ACCESS_TOKEN_EXPIRE_SECONDS", 900),
-  RefreshTokenExpirationSeconds = EnvConfig.GetInt("REFRESH_TOKEN_EXPIRE_SECONDS", 3600)
-});
+// DbContextの登録 (例: インメモリデータベース)
+// 実際のアプリケーションでは、appsettings.jsonや環境変数から接続文字列を取得し、
+// 適切なデータベースプロバイダー (UseSqlServer, UseNpgsqlなど) を使用してください。
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+  // options.UseInMemoryDatabase("AuthApiDb") // インメモリデータベースを使用する場合
+  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? EnvConfig.GetString("DB_CONNECTION_STRING"))
+);
 
+
+
+// 1. JWT設定を環境変数から読み込むように変更
+builder.Services.Configure<JwtSettings>(options =>
+{
+  options.Key = EnvConfig.GetString("JWT_SECRET");
+  options.Issuer = EnvConfig.GetString("JWT_ISSUER");
+  options.Audience = EnvConfig.GetString("JWT_AUDIENCE");
+  options.AccessTokenExpirationSeconds = EnvConfig.GetInt("ACCESS_TOKEN_EXPIRE_SECONDS", 900);
+  options.RefreshTokenExpirationSeconds = EnvConfig.GetInt("REFRESH_TOKEN_EXPIRE_SECONDS", 3600);
+});
 
 // 2. JWT UtilsをDIコンテナに登録
 builder.Services.AddSingleton<IJwtUtils, JwtUtils>();
@@ -64,9 +75,9 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-  var serviceProvider = builder.Services.BuildServiceProvider();
-  var jwtSettings = serviceProvider.GetRequiredService<JwtSettings>();
-
+  // IOptions<JwtSettings> をインジェクトして設定を取得
+  var serviceProvider = builder.Services.BuildServiceProvider(); // 一時的なサービスプロバイダ
+  var jwtSettings = serviceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<JwtSettings>>().Value;
   if (string.IsNullOrEmpty(jwtSettings.Key) || jwtSettings.Key.Length < 32)
   {
     throw new InvalidOperationException("JWT Key must be configured via environment variables (JWT_KEY) and be at least 32 characters long for JWT authentication.");
@@ -82,41 +93,43 @@ builder.Services.AddAuthentication(options =>
     ValidateIssuerSigningKey = true,
     ClockSkew = TimeSpan.Zero
   };
-  // Add services to the container.
-  // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-  builder.Services.AddControllers()
-      .AddJsonOptions(options =>
-      {
-        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-      });
-  builder.Services.AddEndpointsApiExplorer();
-  builder.Services.AddSwaggerGen(c =>
-  {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Auth API", Version = "v1" });
-  });
-
-  builder.Services.AddHealthChecks();
-  builder.Services.AddAuthorization();
-
-  var app = builder.Build();
-
-  // Configure the HTTP request pipeline.
-  if (app.Environment.IsDevelopment())
-  {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    app.UseDeveloperExceptionPage();
-  }
-
-  app.UseRouting();
-  app.UseHttpsRedirection();
-  app.UseAuthentication();
-  app.UseAuthorization();
-  app.MapControllers();
-
-  app.MapHealthChecks("/health");
-
-  app.Run();
 });
+
+// Add services to the container.
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+      options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+      options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+      options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    });
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+  c.SwaggerDoc("v1", new OpenApiInfo { Title = "Auth API", Version = "v1" });
+});
+
+builder.Services.AddHealthChecks();
+builder.Services.AddAuthorization();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+  app.UseSwagger();
+  app.UseSwaggerUI();
+  app.UseDeveloperExceptionPage();
+}
+
+app.UseRouting();
+app.UseHttpsRedirection();
+app.UseAuthentication(); // 認証ミドルウェアを UseAuthorization の前に配置
+app.UseCors();
+app.UseAuthorization();
+app.MapControllers();
+
+app.MapHealthChecks("/health");
+
+app.Run();
