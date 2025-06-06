@@ -4,7 +4,7 @@ using Api.Application.Interfaces;
 using Api.Domain.Entities;
 using Api.Domain.Repositories;
 using Api.Domain.VOs;
-// using Api.Application.DTOs; // DTOsの名前空間を想定
+using UUIDNext;
 
 namespace Api.Application.Services
 {
@@ -64,7 +64,6 @@ namespace Api.Application.Services
       var existingUser = await _userRepository.FindByEmailAsync(email);
       if (existingUser != null)
       {
-        // TODO: より具体的なカスタム例外をスローすることを検討 (例: DuplicateEmailException)
         throw new InvalidOperationException("Email address is already in use.");
       }
 
@@ -72,8 +71,7 @@ namespace Api.Application.Services
       var hashedPassword = _passwordHasher.Hash(password);
 
       // 3. Uuidの生成 (ここでは標準のGuidをUuidに変換)
-      var userUuid = new Uuid(Guid.NewGuid()); // TODO: UUID v7 を使用する場合は適切な生成方法に変更
-
+      var userUuid = new Uuid(UUIDNext.Uuid.NewSequentialUuid(SequentialUuidType.TimeBased)); // UUID v7 を生成
       // 4. Userエンティティの作成 (公開コンストラクタを使用し、PasswordHashは別途設定)
       // int Id はDBが自動生成する
       var newUser = new UserEntity(userUuid, name, email)
