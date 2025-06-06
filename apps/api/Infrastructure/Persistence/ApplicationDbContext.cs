@@ -20,15 +20,11 @@ namespace Api.Infrastructure.Persistence
 
         entity.Property(e => e.Uuid)
               .HasConversion(
-                  uuid => uuid.Value, // UuidからGuidへ
-                  value => new Uuid(value)  // GuidからUuidへ
+                  uuid => uuid.Value,
+                  value => new Uuid(value)
               )
               .IsRequired();
         entity.HasIndex(e => e.Uuid).IsUnique(); // Uuidはユニークであるべき
-
-        // Emailプロパティのインデックス名は明示的に指定した方が良い場合がある
-        // entity.HasIndex(e => e.Email.Value, "IX_User_Email").IsUnique();
-        // ただし、OwnsOne内のプロパティに対するインデックスは以下のように設定
 
         entity.OwnsOne(e => e.Name, name =>
         {
@@ -52,17 +48,17 @@ namespace Api.Infrastructure.Persistence
 
       modelBuilder.Entity<RefreshTokenEntity>(entity =>
       {
-        entity.HasKey(e => e.Id); // Now correctly refers to RefreshTokenEntity.Id (type Uuid)
-        entity.Property(e => e.Id).HasConversion(id => id.Value, value => new Uuid(value)); // Correct for Uuid type PK
+        entity.HasKey(e => e.Id);
+        entity.Property(e => e.Id).HasConversion(id => id.Value, value => new Uuid(value));
 
-        entity.Property(e => e.UserId) // UserId is now Uuid type
+        entity.Property(e => e.UserId)
               .HasConversion(
-                  uuid => uuid.Value, // UuidからGuidへ
-                  value => new Uuid(value)  // GuidからUuidへ
+                  uuid => uuid.Value,
+                  value => new Uuid(value)
               )
               .IsRequired();
 
-        entity.HasOne<UserEntity>().WithMany().HasForeignKey(rt => rt.UserId).HasPrincipalKey(u => u.Uuid); // UserEntity.Uuid を外部キーの参照先とする
+        entity.HasOne<UserEntity>().WithMany().HasForeignKey(rt => rt.UserId).HasPrincipalKey(u => u.Uuid);
       });
     }
   }
