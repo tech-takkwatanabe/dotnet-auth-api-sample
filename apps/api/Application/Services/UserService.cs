@@ -38,7 +38,14 @@ namespace Api.Application.Services
      */
     public async Task<UserEntity?> GetUserByEmailAsync(Email email)
     {
-      return await _userRepository.FindByEmailAsync(email);
+      try
+      {
+        return await _userRepository.FindByEmailAsync(email);
+      }
+      catch (Exception ex)
+      {
+        return null;
+      }
     }
 
     /**
@@ -48,8 +55,14 @@ namespace Api.Application.Services
      */
     public async Task<UserEntity?> GetUserBySubAsync(DomainUuid uuid)
     {
-      // GetUserByIdAsync と同じロジックで良いため、そちらを呼び出すか、直接リポジトリを呼び出す
-      return await _userRepository.FindByUuidAsync(uuid);
+      try
+      {
+        return await _userRepository.FindByUuidAsync(uuid);
+      }
+      catch (Exception ex)
+      {
+        return null;
+      }
     }
 
     /**
@@ -71,16 +84,25 @@ namespace Api.Application.Services
       // 2. パスワードのハッシュ化
       var hashedPassword = _passwordHasher.Hash(password);
 
-      // 3. Uuidの生成 (ここでは標準のGuidをUuidに変換)
-      var userUuid = new DomainUuid(UUIDNext.Uuid.NewDatabaseFriendly(UUIDNext.Database.SqlServer)); // UUID v7 (SQL Server向け) を生成
+      // 3. UUID v7 (SQL Server向け) を生成
+      var userUuid = new DomainUuid(UUIDNext.Uuid.NewDatabaseFriendly(UUIDNext.Database.SqlServer));
+
       // 4. Userエンティティの作成 (公開コンストラクタを使用し、PasswordHashは別途設定)
       // int Id はDBが自動生成する
       var newUser = new UserEntity(userUuid, name, email)
       {
         PasswordHash = hashedPassword // PasswordHashプロパティにはpublic setがあるため設定可能
       };
+
       // 5. ユーザーの保存
-      await _userRepository.SaveAsync(newUser);
+      try
+      {
+        await _userRepository.SaveAsync(newUser);
+      }
+      catch (Exception ex)
+      {
+        throw new InvalidOperationException("Failed to register user.", ex);
+      }
     }
 
     /**
