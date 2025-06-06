@@ -24,7 +24,7 @@ namespace Api.Application.Services
      * @param id ユーザーID
      * @return *dto.UserDTO ユーザー情報 (現在はUserエンティティを返す想定)
      */
-    public async Task<User?> GetUserByIdAsync(Uuid id)
+    public async Task<UserEntity?> GetUserByIdAsync(Uuid id)
     {
       // TODO: Implement actual logic
       // 例: return await _userRepository.FindByIdAsync(id);
@@ -37,7 +37,7 @@ namespace Api.Application.Services
      * @param uuid UUID
      * @return *dto.UserDTO ユーザー情報 (現在はUserエンティティを返す想定)
      */
-    public async Task<User?> GetUserBySubAsync(Uuid uuid)
+    public async Task<UserEntity?> GetUserBySubAsync(Uuid uuid)
     {
       // TODO: Implement actual logic
       // 例: return await _userRepository.FindByIdAsync(uuid);

@@ -6,8 +6,8 @@ namespace Api.Domain.Repositories
 {
   public interface IUserRepository
   {
-    Task SaveAsync(User user);
-    Task<User?> FindByEmailAsync(Email email);
-    Task<User?> FindByIdAsync(Uuid id);
+    Task SaveAsync(UserEntity user);
+    Task<UserEntity?> FindByEmailAsync(Email email);
+    Task<UserEntity?> FindByIdAsync(Uuid id);
   }
 }

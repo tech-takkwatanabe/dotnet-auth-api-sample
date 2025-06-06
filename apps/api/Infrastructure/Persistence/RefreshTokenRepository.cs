@@ -10,13 +10,13 @@ namespace Api.Infrastructure.Persistence
   {
     private readonly ApplicationDbContext _context = context;
 
-    public async Task<RefreshToken?> FindByIdAsync(Uuid id)
+    public async Task<RefreshTokenEntity?> FindByIdAsync(Uuid id)
     {
       return await _context.RefreshTokens
                            .FirstOrDefaultAsync(rt => rt.Id.Value == id.Value);
     }
 
-    public async Task SaveAsync(RefreshToken refreshToken)
+    public async Task SaveAsync(RefreshTokenEntity refreshToken)
     {
       var existingToken = await _context.RefreshTokens
                                         .AsTracking()

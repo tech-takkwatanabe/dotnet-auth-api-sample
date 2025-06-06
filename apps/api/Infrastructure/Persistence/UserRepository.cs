@@ -10,19 +10,19 @@ namespace Api.Infrastructure.Persistence
   {
     private readonly ApplicationDbContext _context = context;
 
-    public async Task<User?> FindByEmailAsync(Email email)
+    public async Task<UserEntity?> FindByEmailAsync(Email email)
     {
       return await _context.Users
                           .FirstOrDefaultAsync(u => u.Email.Value == email.Value);
     }
 
-    public async Task<User?> FindByIdAsync(Uuid id)
+    public async Task<UserEntity?> FindByIdAsync(Uuid id)
     {
       return await _context.Users
                           .FirstOrDefaultAsync(u => u.Id.Value == id.Value);
     }
 
-    public async Task SaveAsync(User user)
+    public async Task SaveAsync(UserEntity user)
     {
       var existingUser = await _context.Users
                           .AsTracking()

@@ -4,20 +4,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Infrastructure.Persistence
 {
-  public class ApplicationDbContext : DbContext
+  public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
   {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-    {
-    }
-
-    public DbSet<User> Users { get; set; }
-    public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<UserEntity> Users { get; set; }
+    public DbSet<RefreshTokenEntity> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
 
-      modelBuilder.Entity<User>(entity =>
+      modelBuilder.Entity<UserEntity>(entity =>
       {
         entity.HasKey(e => e.Id);
         entity.Property(e => e.Id)
@@ -46,7 +42,7 @@ namespace Api.Infrastructure.Persistence
         entity.HasIndex("Email").IsUnique();
       });
 
-      modelBuilder.Entity<RefreshToken>(entity =>
+      modelBuilder.Entity<RefreshTokenEntity>(entity =>
       {
         entity.HasKey(e => e.Id);
         entity.Property(e => e.Id).HasConversion(id => id.Value, value => new Uuid(value));
