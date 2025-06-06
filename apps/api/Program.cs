@@ -3,6 +3,9 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Api.Application.Interfaces;
+using Api.Application.Services;
+using Api.Application.UseCases.UserRegistration;
+using Api.Domain.Repositories;
 using Api.Infrastructure.Configuration;
 using Api.Infrastructure.Persistence;
 using Api.Infrastructure.Security;
@@ -51,7 +54,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
   // options.UseInMemoryDatabase("AuthApiDb") // インメモリデータベースを使用する場合
   options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? EnvConfig.GetString("DB_CONNECTION_STRING"))
 );
-
 
 
 // 1. JWT設定を環境変数から読み込むように変更
@@ -112,6 +114,13 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddHealthChecks();
 builder.Services.AddAuthorization();
+builder.Services.AddScoped<RegisterUserCommandHandler>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+// IPasswordHasher の実装クラスを登録します。
+// 実装クラスが PasswordHasher で、Api.Infrastructure.Security 名前空間にあると仮定しています。
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
 var app = builder.Build();
 
