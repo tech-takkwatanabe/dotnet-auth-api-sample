@@ -1,6 +1,6 @@
-using System; // For Exception types
-using System.Threading.Tasks; // For Task
-using Api.Application.UseCases.UserRegistration; // For RegisterUserCommand and RegisterUserCommandHandler
+using System;
+using System.Threading.Tasks;
+using Api.Application.UseCases.UserRegistration;
 using Api.Domain.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
