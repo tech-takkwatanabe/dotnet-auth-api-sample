@@ -16,7 +16,7 @@ namespace Api.Infrastructure.Persistence
       modelBuilder.Entity<UserEntity>(entity =>
       {
         entity.HasKey(e => e.Id);
-        entity.Property(e => e.Id).ValueGeneratedOnAdd(); // int型の主キーはDBで自動生成
+        entity.Property(e => e.Id).ValueGeneratedOnAdd(); // long型の主キーはDBで自動生成
 
         entity.Property(e => e.Uuid)
               .HasConversion(
@@ -38,17 +38,15 @@ namespace Api.Infrastructure.Persistence
               .IsRequired();
         });
 
-        entity.OwnsOne(e => e.Email, email =>
+        entity.OwnsOne(e => e.Email, emailBuilder =>
         {
-          email.Property(e => e.Value)
+          emailBuilder.Property(vo => vo.Value)
                .HasColumnName("Email")
                .HasMaxLength(320)
                .IsRequired();
+          // Email Value Object の Value プロパティに対してユニーク制約を設定
+          emailBuilder.HasIndex(vo => vo.Value).IsUnique().HasDatabaseName("IX_User_Email");
         });
-
-        // Email Value Object の Value プロパティに対してユニーク制約を設定
-        // EF Core 5.0以降では、Owned Typeのプロパティに対するインデックスはこのように設定
-        entity.HasIndex(e => new { e.Email.Value }).IsUnique().HasDatabaseName("IX_User_Email");
 
       });
 
