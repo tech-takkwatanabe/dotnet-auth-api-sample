@@ -14,7 +14,7 @@ namespace Api.Application.UseCases.UserRegistration
       var email = new Email(command.Email);
       var passwordVO = new Password(command.Password);
 
-      await _userService.RegisterUserAsync(name, email, password.Value);
+      await _userService.RegisterUserAsync(name, email, passwordVO.Value);
     }
   }
 }
