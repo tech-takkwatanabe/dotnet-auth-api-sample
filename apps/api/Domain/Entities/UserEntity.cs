@@ -3,24 +3,28 @@ using Api.Domain.VOs;
 
 namespace Api.Domain.Entities
 {
-  public class UserEntity : IEntity<Uuid>
+  public class UserEntity : IEntity<int>
   {
-    public Uuid Id { get; private set; }
+    public int Id { get; private set; }
+    public Uuid Uuid { get; private set; }
     public Name Name { get; private set; }
     public Email Email { get; private set; }
+    public string? PasswordHash { get; set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
-    private UserEntity()
+    private UserEntity() // EF Core用
     {
-      Id = Uuid.NewUuid();
-      Name = new Name("Default Name");
-      Email = new Email("default@example.com");
+      Uuid = Uuid.NewUuid();
+      Name = null!;
+      Email = null!;
+      CreatedAt = DateTime.UtcNow;
+      UpdatedAt = DateTime.UtcNow;
     }
 
-    public UserEntity(Uuid id, Name name, Email email)
+    public UserEntity(Uuid uuid, Name name, Email email)
     {
-      Id = id ?? throw new ArgumentNullException(nameof(id));
+      Uuid = uuid ?? throw new ArgumentNullException(nameof(uuid));
       Name = name ?? throw new ArgumentNullException(nameof(name));
       Email = email ?? throw new ArgumentNullException(nameof(email));
       CreatedAt = DateTime.UtcNow;
