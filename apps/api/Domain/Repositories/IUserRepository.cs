@@ -8,6 +8,6 @@ namespace Api.Domain.Repositories
   {
     Task SaveAsync(UserEntity user);
     Task<UserEntity?> FindByEmailAsync(Email email);
-    Task<UserEntity?> FindByIdAsync(Uuid id);
+    Task<UserEntity?> FindByUuidAsync(Uuid uuid);
   }
 }

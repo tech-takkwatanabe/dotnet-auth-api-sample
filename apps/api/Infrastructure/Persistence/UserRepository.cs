@@ -16,17 +16,17 @@ namespace Api.Infrastructure.Persistence
                           .FirstOrDefaultAsync(u => u.Email.Value == email.Value);
     }
 
-    public async Task<UserEntity?> FindByIdAsync(Uuid id)
+    public async Task<UserEntity?> FindByUuidAsync(Uuid uuid)
     {
       return await _context.Users
-                          .FirstOrDefaultAsync(u => u.Id.Value == id.Value);
+                          .FirstOrDefaultAsync(u => u.Uuid.Value == uuid.Value); // UserEntity.Uuidプロパティで検索
     }
 
     public async Task SaveAsync(UserEntity user)
     {
       var existingUser = await _context.Users
                           .AsTracking()
-                          .FirstOrDefaultAsync(u => u.Id.Value == user.Id.Value);
+                          .FirstOrDefaultAsync(u => u.Id == user.Id && user.Id != 0); // int型のIdで検索 (0は新規扱い)
 
       if (existingUser == null)
       {
