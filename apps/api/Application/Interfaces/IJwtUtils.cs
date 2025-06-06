@@ -5,8 +5,8 @@ namespace Api.Application.Interfaces
 {
   public interface IJwtUtils
   {
-    string GenerateAccessToken(Uuid userId);
-    string GenerateRefreshToken(Uuid userId);
+    string GenerateAccessToken(Uuid userUuid);
+    string GenerateRefreshToken(Uuid userUuid);
     Uuid? ValidateTokenAndGetUserId(string? token);
     ClaimsPrincipal? GetPrincipalFromExpiredToken(string? token);
   }
