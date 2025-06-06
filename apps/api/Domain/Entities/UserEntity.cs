@@ -3,9 +3,9 @@ using Api.Domain.VOs;
 
 namespace Api.Domain.Entities
 {
-  public class UserEntity : IEntity<int>
+  public class UserEntity : IEntity<long>
   {
-    public int Id { get; private set; }
+    public long Id { get; private set; }
     public Uuid Uuid { get; private set; }
     public Name Name { get; private set; }
     public Email Email { get; private set; }
