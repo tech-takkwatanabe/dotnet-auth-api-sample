@@ -1,7 +1,7 @@
 namespace Api.Domain.DTOs;
 
 public record SignUpRequest(
-    string UserName,
+    string Name,
     string Email,
     string Password
 );
@@ -16,7 +16,7 @@ public record RefreshTokenRequest(
 );
 
 public record SignUpResponse(
-    string UserName,  
+    string Name,
     string Email
 );
 
@@ -29,9 +29,9 @@ public record AuthResponse(
 public record UserResponse(
     string Uuid,
     string Email,
-    string UserName
-); 
+    string Name
+);
 
 public record LogoutResponse(
     string Message
-); 
+);
