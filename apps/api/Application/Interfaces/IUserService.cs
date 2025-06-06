@@ -12,7 +12,7 @@ namespace Api.Application.Interfaces
      * @param id ユーザーID
      * @return *dto.UserDTO ユーザー情報 (現在はUserエンティティを返す想定)
      */
-    Task<UserEntity?> GetUserByIdAsync(Uuid id);
+    Task<UserEntity?> GetUserByUuidAsync(Uuid uuid); // メソッド名を変更して意図を明確化
 
     /**
      * ユーザーUUIDからユーザー情報を取得する (JWTのsubクレームなど)
@@ -34,9 +34,9 @@ namespace Api.Application.Interfaces
      * ユーザーログイン
      * @param email メールアドレス
      * @param password パスワード
-     * @return (string AccessToken, string RefreshToken, Uuid UserId) 認証情報 (失敗時はnull)
+     * @return (string AccessToken, string RefreshToken, Uuid UserUuid) 認証情報 (失敗時はnull)
      */
-    Task<(string AccessToken, string RefreshToken, Uuid UserId)?> LoginUserAsync(Email email, string password);
+    Task<(string AccessToken, string RefreshToken, Uuid UserUuid)?> LoginUserAsync(Email email, string password);
 
     /**
      * リフレッシュトークンを使用して新しいアクセストークンを取得する
