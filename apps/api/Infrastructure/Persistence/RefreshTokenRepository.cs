@@ -10,17 +10,17 @@ namespace Api.Infrastructure.Persistence
   {
     private readonly ApplicationDbContext _context = context;
 
-    public async Task<RefreshTokenEntity?> FindByIdAsync(Uuid id)
+    public async Task<RefreshTokenEntity?> FindByUuidAsync(Uuid uuid)
     {
       return await _context.RefreshTokens
-                           .FirstOrDefaultAsync(rt => rt.Id.Value == id.Value);
+                           .FirstOrDefaultAsync(rt => rt.Id.Value == uuid.Value); // Now correctly refers to RefreshTokenEntity.Id
     }
 
     public async Task SaveAsync(RefreshTokenEntity refreshToken)
     {
       var existingToken = await _context.RefreshTokens
                                         .AsTracking()
-                                        .FirstOrDefaultAsync(rt => rt.Id.Value == refreshToken.Id.Value);
+                                        .FirstOrDefaultAsync(rt => rt.Id.Value == refreshToken.Id.Value); // Now correctly refers to RefreshTokenEntity.Id
 
       if (existingToken == null)
       {
@@ -33,10 +33,10 @@ namespace Api.Infrastructure.Persistence
       await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteByIdAsync(Uuid id)
+    public async Task DeleteByUuidAsync(Uuid uuid)
     {
       var tokenToDelete = await _context.RefreshTokens
-                                       .FirstOrDefaultAsync(rt => rt.Id.Value == id.Value);
+                                       .FirstOrDefaultAsync(rt => rt.Id.Value == uuid.Value); // Now correctly refers to RefreshTokenEntity.Id
 
       if (tokenToDelete != null)
       {
