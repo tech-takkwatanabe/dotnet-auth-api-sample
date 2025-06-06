@@ -8,25 +8,16 @@ using Api.Domain.VOs;
 
 namespace Api.Application.Services
 {
-  public class UserService : IUserService
-  {
-    private readonly IUserRepository _userRepository;
-    private readonly IRefreshTokenRepository _refreshTokenRepository;
-    private readonly IJwtUtils _jwtUtils;
-    // private readonly IPasswordHasher _passwordHasher; // パスワードハッシュ化サービスのインターフェースを想定
-
-    public UserService(
-        IUserRepository userRepository,
-        IRefreshTokenRepository refreshTokenRepository,
-        IJwtUtils jwtUtils
+  public class UserService(
+      IUserRepository userRepository,
+      IRefreshTokenRepository refreshTokenRepository,
+      IJwtUtils jwtUtils
         // IPasswordHasher passwordHasher
-        )
-    {
-      _userRepository = userRepository;
-      _refreshTokenRepository = refreshTokenRepository;
-      _jwtUtils = jwtUtils;
-      // _passwordHasher = passwordHasher;
-    }
+        ) : IUserService
+  {
+    private readonly IUserRepository _userRepository = userRepository;
+    private readonly IRefreshTokenRepository _refreshTokenRepository = refreshTokenRepository;
+    private readonly IJwtUtils _jwtUtils = jwtUtils;
 
     /**
      * ユーザーIDからユーザー情報を取得する
