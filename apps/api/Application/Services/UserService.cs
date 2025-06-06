@@ -5,6 +5,7 @@ using Api.Domain.Entities;
 using Api.Domain.Repositories;
 using Api.Domain.VOs;
 using UUIDNext;
+using DomainUuid = Api.Domain.VOs.Uuid; // Uuidのエイリアスを定義
 
 namespace Api.Application.Services
 {
@@ -25,7 +26,7 @@ namespace Api.Application.Services
      * @param id ユーザーID
      * @return *dto.UserDTO ユーザー情報 (現在はUserエンティティを返す想定)
      */
-    public async Task<UserEntity?> GetUserByUuidAsync(Uuid uuid)
+    public async Task<UserEntity?> GetUserByUuidAsync(DomainUuid uuid)
     {
       return await _userRepository.FindByUuidAsync(uuid);
     }
@@ -45,7 +46,7 @@ namespace Api.Application.Services
      * @param uuid UUID
      * @return *dto.UserDTO ユーザー情報 (現在はUserエンティティを返す想定)
      */
-    public async Task<UserEntity?> GetUserBySubAsync(Uuid uuid)
+    public async Task<UserEntity?> GetUserBySubAsync(DomainUuid uuid)
     {
       // GetUserByIdAsync と同じロジックで良いため、そちらを呼び出すか、直接リポジトリを呼び出す
       return await _userRepository.FindByUuidAsync(uuid);
@@ -71,7 +72,7 @@ namespace Api.Application.Services
       var hashedPassword = _passwordHasher.Hash(password);
 
       // 3. Uuidの生成 (ここでは標準のGuidをUuidに変換)
-      var userUuid = new Uuid(UUIDNext.Uuid.NewSequentialUuid(SequentialUuidType.TimeBased)); // UUID v7 を生成
+      var userUuid = new DomainUuid(UUIDNext.Uuid.NewDatabaseFriendly(UUIDNext.Database.SqlServer)); // UUID v7 (SQL Server向け) を生成
       // 4. Userエンティティの作成 (公開コンストラクタを使用し、PasswordHashは別途設定)
       // int Id はDBが自動生成する
       var newUser = new UserEntity(userUuid, name, email)
@@ -88,7 +89,7 @@ namespace Api.Application.Services
      * @param password パスワード
      * @return (string AccessToken, string RefreshToken, Uuid UserUuid) 認証情報 (失敗時はnull)
      */
-    public async Task<(string AccessToken, string RefreshToken, Uuid UserUuid)?> LoginUserAsync(Email email, string password)
+    public async Task<(string AccessToken, string RefreshToken, DomainUuid UserUuid)?> LoginUserAsync(Email email, string password)
     {
       // TODO: Implement actual logic
       // 1. _userRepository.FindByEmailAsync(email);
