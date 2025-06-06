@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Net.Mail;
 
 namespace Api.Domain.VOs
 {
@@ -15,6 +16,15 @@ namespace Api.Domain.VOs
       if (string.IsNullOrWhiteSpace(value))
       {
         throw new ArgumentException("Email cannot be empty.", nameof(value));
+      }
+      try
+      {
+        // MailAddress クラスを使ってメールアドレスの形式を検証
+        _ = new MailAddress(value);
+      }
+      catch (FormatException)
+      {
+        throw new ArgumentException("Invalid email format.", nameof(value));
       }
       Value = value;
     }
