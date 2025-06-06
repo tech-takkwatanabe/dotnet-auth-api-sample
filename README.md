@@ -16,4 +16,5 @@ dotnet add package DotNetEnv
 dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
 
 dotnet add package BCrypt.Net-Next
+dotnet add package UUIDNext
 ```
