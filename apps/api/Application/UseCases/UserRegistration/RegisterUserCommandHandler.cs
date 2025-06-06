@@ -12,9 +12,9 @@ namespace Api.Application.UseCases.UserRegistration
     {
       var name = new Name(command.Name);
       var email = new Email(command.Email);
-      var password = command.Password;
+      var passwordVO = new Password(command.Password);
 
-      await _userService.RegisterUserAsync(name, email, password);
+      await _userService.RegisterUserAsync(name, email, password.Value);
     }
   }
 }
