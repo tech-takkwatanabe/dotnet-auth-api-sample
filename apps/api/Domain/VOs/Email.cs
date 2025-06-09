@@ -1,9 +1,14 @@
 using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Mail;
+using System.Text.Json.Serialization; // JsonConverter属性のために追加
+using Api.Domain.VOs.Converters; // Converters 名前空間を using
 
 namespace Api.Domain.VOs
 {
+  [TypeConverter(typeof(EmailTypeConverter))]
+  [JsonConverter(typeof(EmailJsonConverter))] // JsonConverter属性を追加
   public class Email : IEquatable<Email>
   {
     [Required]
