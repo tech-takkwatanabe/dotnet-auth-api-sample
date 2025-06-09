@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Api.Domain.DTOs;
 using Api.Domain.Entities;
 using Api.Domain.VOs;
 // using Api.Application.DTOs; // DTOsの名前空間を想定
@@ -28,7 +29,7 @@ namespace Api.Application.Interfaces
      * @param password パスワード
      * @return error エラー (成功時はTask.CompletedTask, エラー時は例外をスローする想定)
      */
-    Task RegisterUserAsync(Name name, Email email, string password);
+    Task RegisterUserAsync(SignUpRequest request);
 
     /**
      * ユーザーログイン
