@@ -1,14 +1,16 @@
+using Api.Domain.VOs;
+
 namespace Api.Domain.DTOs;
 
 public record SignUpRequest(
-    string Name,
-    string Email,
-    string Password
+    Name Name,
+    Email Email,
+    Password Password
 );
 
 public record LoginRequest(
-    string Email,
-    string Password
+    Email Email,
+    Password Password
 );
 
 public record RefreshTokenRequest(
@@ -16,8 +18,8 @@ public record RefreshTokenRequest(
 );
 
 public record SignUpResponse(
-    string Name,
-    string Email
+    Name Name,
+    Email Email
 );
 
 public record AuthResponse(
@@ -27,9 +29,9 @@ public record AuthResponse(
 );
 
 public record UserResponse(
-    string Uuid,
-    string Email,
-    string Name
+    Uuid Uuid,
+    Email Email,
+    Name Name
 );
 
 public record LogoutResponse(
