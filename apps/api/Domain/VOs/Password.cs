@@ -1,12 +1,12 @@
 using System;
 using System.ComponentModel;
-using System.Text.Json.Serialization; // JsonConverter属性のために追加
-using Api.Domain.VOs.Converters; // Converters 名前空間を using
+using System.Text.Json.Serialization;
+using Api.Domain.VOs.Converters;
 
 namespace Api.Domain.VOs
 {
   [TypeConverter(typeof(PasswordTypeConverter))]
-  [JsonConverter(typeof(PasswordJsonConverter))] // JsonConverter属性を追加
+  [JsonConverter(typeof(PasswordJsonConverter))]
   public class Password : IEquatable<Password>
   {
     public string Value { get; }
