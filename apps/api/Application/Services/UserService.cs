@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Api.Application.Interfaces;
+using Api.Domain.DTOs;
 using Api.Domain.Entities;
 using Api.Domain.Repositories;
 using Api.Domain.VOs;
@@ -38,14 +39,7 @@ namespace Api.Application.Services
      */
     public async Task<UserEntity?> GetUserByEmailAsync(Email email)
     {
-      try
-      {
-        return await _userRepository.FindByEmailAsync(email);
-      }
-      catch (Exception ex)
-      {
-        return null;
-      }
+      return await _userRepository.FindByEmailAsync(email);
     }
 
     /**
@@ -55,14 +49,7 @@ namespace Api.Application.Services
      */
     public async Task<UserEntity?> GetUserBySubAsync(DomainUuid uuid)
     {
-      try
-      {
-        return await _userRepository.FindByUuidAsync(uuid);
-      }
-      catch (Exception ex)
-      {
-        return null;
-      }
+      return await _userRepository.FindByUuidAsync(uuid);
     }
 
     /**
@@ -72,24 +59,24 @@ namespace Api.Application.Services
      * @param password パスワード
      * @return error エラー (成功時はTask.CompletedTask, エラー時は例外をスローする想定)
      */
-    public async Task RegisterUserAsync(Name name, Email email, string password)
+    public async Task RegisterUserAsync(SignUpRequest request)
     {
       // 1. Emailの重複チェック
-      var existingUser = await _userRepository.FindByEmailAsync(email);
+      var existingUser = await _userRepository.FindByEmailAsync(request.Email);
       if (existingUser != null)
       {
         throw new InvalidOperationException("Email address is already in use.");
       }
 
       // 2. パスワードのハッシュ化
-      var hashedPassword = _passwordHasher.Hash(password);
+      var hashedPassword = _passwordHasher.Hash(request.Password.Value);
 
       // 3. UUID v7 (SQL Server向け) を生成
       var userUuid = new DomainUuid(UUIDNext.Uuid.NewDatabaseFriendly(UUIDNext.Database.SqlServer));
 
       // 4. Userエンティティの作成 (公開コンストラクタを使用し、PasswordHashは別途設定)
       // int Id はDBが自動生成する
-      var newUser = new UserEntity(userUuid, name, email)
+      var newUser = new UserEntity(userUuid, request.Name, request.Email)
       {
         PasswordHash = hashedPassword // PasswordHashプロパティにはpublic setがあるため設定可能
       };
