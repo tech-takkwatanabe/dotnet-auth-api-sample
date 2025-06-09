@@ -1,48 +1,55 @@
+using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Api.Domain.Entities;
 using Api.Domain.Repositories;
 using Api.Domain.VOs;
-using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 
 namespace Api.Infrastructure.Persistence
 {
-  public class RefreshTokenRepository(ApplicationDbContext context) : IRefreshTokenRepository
+  public class RefreshTokenRepository(IConnectionMultiplexer redisConnection, TimeSpan? tokenExpiry = null) : IRefreshTokenRepository
   {
-    private readonly ApplicationDbContext _context = context;
+    private readonly IDatabase _redis = redisConnection.GetDatabase();
+    private readonly TimeSpan _tokenExpiry = tokenExpiry ?? TimeSpan.FromDays(7);
 
     public async Task<RefreshTokenEntity?> FindByUuidAsync(Uuid uuid)
     {
-      return await _context.RefreshTokens
-                           .FirstOrDefaultAsync(rt => rt.Id.Value == uuid.Value); // Now correctly refers to RefreshTokenEntity.Id
+      var tokenKey = GetRedisKey(uuid);
+      var tokenJson = await _redis.StringGetAsync(tokenKey);
+      if (tokenJson.IsNullOrEmpty)
+      {
+        return null;
+      }
+      // JSONからRefreshTokenEntityにデシリアライズ
+      // System.Text.Json を使用する場合
+      return JsonSerializer.Deserialize<RefreshTokenEntity>(tokenJson.ToString());
     }
 
     public async Task SaveAsync(RefreshTokenEntity refreshToken)
     {
-      var existingToken = await _context.RefreshTokens
-                                        .AsTracking()
-                                        .FirstOrDefaultAsync(rt => rt.Id.Value == refreshToken.Id.Value); // Now correctly refers to RefreshTokenEntity.Id
+      var tokenKey = GetRedisKey(refreshToken.Id);
+      // RefreshTokenEntityをJSONにシリアライズ
+      // System.Text.Json を使用する場合
+      var tokenJson = JsonSerializer.Serialize(refreshToken);
+      // Redisに保存し、有効期限を設定
+      // 有効期限は refreshToken.ExpiresAt と Redis のキーの有効期限の短い方を取るなどの考慮も可能
+      var actualExpiry = refreshToken.ExpiresAt - DateTime.UtcNow;
+      if (actualExpiry <= TimeSpan.Zero) actualExpiry = _tokenExpiry; // 既に期限切れならデフォルト
 
-      if (existingToken == null)
-      {
-        _context.RefreshTokens.Add(refreshToken);
-      }
-      else
-      {
-        _context.Entry(existingToken).CurrentValues.SetValues(refreshToken);
-      }
-      await _context.SaveChangesAsync();
+      var finalExpiry = actualExpiry < _tokenExpiry ? actualExpiry : _tokenExpiry;
+      await _redis.StringSetAsync(tokenKey, tokenJson, finalExpiry);
     }
 
     public async Task DeleteByUuidAsync(Uuid uuid)
     {
-      var tokenToDelete = await _context.RefreshTokens
-                                       .FirstOrDefaultAsync(rt => rt.Id.Value == uuid.Value); // Now correctly refers to RefreshTokenEntity.Id
+      var tokenKey = GetRedisKey(uuid);
+      await _redis.KeyDeleteAsync(tokenKey);
+    }
 
-      if (tokenToDelete != null)
-      {
-        _context.RefreshTokens.Remove(tokenToDelete);
-        await _context.SaveChangesAsync();
-      }
+    private static string GetRedisKey(Uuid tokenId)
+    {
+      return $"refreshtoken:{tokenId.Value}";
     }
   }
 }
