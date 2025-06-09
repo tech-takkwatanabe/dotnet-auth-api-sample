@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Api.Application.Interfaces;
 using Api.Application.Services;
+using Api.Application.UseCases.UserLogin;
 using Api.Application.UseCases.UserRegistration;
 using Api.Domain.Repositories;
 using Api.Infrastructure.Configuration;
@@ -16,6 +17,7 @@ using Microsoft.AspNetCore.OpenApi;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 var builder = WebApplication.CreateBuilder(args);
 
 // Kestrelの設定
@@ -55,6 +57,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
   options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? EnvConfig.GetString("DB_CONNECTION_STRING"))
 );
 
+// Redis接続設定
+var redisConnectionString = builder.Configuration.GetConnectionString("RedisConnection") ?? "localhost:6379"; // デフォルト値を設定
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
 
 // 1. JWT設定を環境変数から読み込むように変更
 builder.Services.Configure<JwtSettings>(options =>
@@ -76,26 +81,26 @@ builder.Services.AddAuthentication(options =>
   options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
-{
-  // IOptions<JwtSettings> をインジェクトして設定を取得
-  var serviceProvider = builder.Services.BuildServiceProvider(); // 一時的なサービスプロバイダ
-  var jwtSettings = serviceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<JwtSettings>>().Value;
-  if (string.IsNullOrEmpty(jwtSettings.Key) || jwtSettings.Key.Length < 32)
-  {
-    throw new InvalidOperationException("JWT Key must be configured via environment variables (JWT_KEY) and be at least 32 characters long for JWT authentication.");
-  }
-  options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-  {
-    ValidateIssuer = true,
-    ValidIssuer = jwtSettings.Issuer,
-    ValidateAudience = true,
-    ValidAudience = jwtSettings.Audience,
-    ValidateLifetime = true,
-    IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
-    ValidateIssuerSigningKey = true,
-    ClockSkew = TimeSpan.Zero
-  };
-});
+ {
+   var sp = builder.Services.BuildServiceProvider();
+   var jwtSettings = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<JwtSettings>>().Value;
+
+   if (string.IsNullOrEmpty(jwtSettings.Key) || jwtSettings.Key.Length < 32)
+   {
+     throw new InvalidOperationException("JWT Key must be configured via environment variables (JWT_KEY) and be at least 32 characters long for JWT authentication.");
+   }
+   options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+   {
+     ValidateIssuer = true,
+     ValidIssuer = jwtSettings.Issuer,
+     ValidateAudience = true,
+     ValidAudience = jwtSettings.Audience,
+     ValidateLifetime = true,
+     IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
+     ValidateIssuerSigningKey = true,
+     ClockSkew = TimeSpan.Zero
+   };
+ });
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -115,6 +120,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddHealthChecks();
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<RegisterUserCommandHandler>();
+builder.Services.AddScoped<LoginUserCommandHandler>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
