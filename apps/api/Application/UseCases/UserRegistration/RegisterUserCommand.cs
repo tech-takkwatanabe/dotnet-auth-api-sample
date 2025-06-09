@@ -1,8 +1,10 @@
+using Api.Domain.VOs;
+
 namespace Api.Application.UseCases.UserRegistration
 {
   public record RegisterUserCommand(
-      string Name,
-      string Email,
-      string Password
+      Name Name,
+      Email Email,
+      Password Password
   );
 }
