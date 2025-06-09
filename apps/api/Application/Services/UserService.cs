@@ -5,6 +5,8 @@ using Api.Domain.DTOs;
 using Api.Domain.Entities;
 using Api.Domain.Repositories;
 using Api.Domain.VOs;
+using Api.Infrastructure.Settings;
+using Microsoft.Extensions.Options;
 using UUIDNext;
 using DomainUuid = Api.Domain.VOs.Uuid; // Uuidのエイリアスを定義
 
@@ -14,13 +16,15 @@ namespace Api.Application.Services
       IUserRepository userRepository,
       IRefreshTokenRepository refreshTokenRepository,
       IJwtUtils jwtUtils,
-      IPasswordHasher passwordHasher
+      IPasswordHasher passwordHasher,
+      IOptions<JwtSettings> jwtSettings // JwtSettings をDIで受け取る
         ) : IUserService
   {
     private readonly IUserRepository _userRepository = userRepository;
     private readonly IRefreshTokenRepository _refreshTokenRepository = refreshTokenRepository;
     private readonly IJwtUtils _jwtUtils = jwtUtils;
     private readonly IPasswordHasher _passwordHasher = passwordHasher;
+    private readonly JwtSettings _jwtSettings = jwtSettings.Value; // JwtSettings の値を保持
 
     /**
      * ユーザーIDからユーザー情報を取得する
@@ -98,17 +102,40 @@ namespace Api.Application.Services
      * @param password パスワード
      * @return (string AccessToken, string RefreshToken, Uuid UserUuid) 認証情報 (失敗時はnull)
      */
-    public async Task<(string AccessToken, string RefreshToken, DomainUuid UserUuid)?> LoginUserAsync(Email email, string password)
+    public async Task<(string AccessToken, string RefreshToken, DomainUuid UserUuid)?> LoginUserAsync(LoginRequest request)
     {
-      // TODO: Implement actual logic
-      // 1. _userRepository.FindByEmailAsync(email);
-      // 2. ユーザー存在チェック
-      // 3. パスワード検証 (例: if (!_passwordHasher.Verify(password, user.PasswordHash)) return null;)
-      // 4. var accessToken = _jwtUtils.GenerateAccessToken(user.Uuid); // 'sub' クレームに user.Uuid を使用
-      // 5. var refreshTokenString = _jwtUtils.GenerateRefreshToken(user.Uuid); // 'sub' クレームに user.Uuid を使用
-      // 6. リフレッシュトークンをDBに保存 (_refreshTokenRepository.SaveAsync)
-      await Task.CompletedTask; // 仮実装
-      throw new NotImplementedException();
+      var email = request.Email;
+      var password = request.Password.Value;
+
+      // 1. ユーザーの取得
+      var user = await _userRepository.FindByEmailAsync(email);
+      if (user == null)
+      {
+        return null; // ユーザーが存在しない場合はnullを返す
+      }
+
+      // 2. パスワードの検証
+      if (user.PasswordHash == null)
+      {
+        return null; // PasswordHash が null の場合は認証失敗
+      }
+      if (!_passwordHasher.Verify(password, user.PasswordHash!)) // null免除演算子を使用
+      {
+        return null; // パスワードが一致しない場合はnullを返す
+      }
+
+      // 3. アクセストークンの生成
+      var accessToken = _jwtUtils.GenerateAccessToken(user.Uuid);
+
+      // 4. リフレッシュトークンの生成と保存
+      var refreshTokenString = _jwtUtils.GenerateRefreshToken(user.Uuid);
+      var expiresAt = DateTime.UtcNow.AddSeconds(_jwtSettings.RefreshTokenExpirationSeconds);
+
+      // userId は user.Uuid を使用します。
+      var refreshToken = new RefreshTokenEntity(user.Uuid, refreshTokenString, user.Uuid, expiresAt);
+      await _refreshTokenRepository.SaveAsync(refreshToken);
+
+      return (accessToken, refreshTokenString, user.Uuid);
     }
 
     /**

@@ -37,7 +37,7 @@ namespace Api.Application.Interfaces
      * @param password パスワード
      * @return (string AccessToken, string RefreshToken, Uuid UserUuid) 認証情報 (失敗時はnull)
      */
-    Task<(string AccessToken, string RefreshToken, Uuid UserUuid)?> LoginUserAsync(Email email, string password);
+    Task<(string AccessToken, string RefreshToken, Uuid UserUuid)?> LoginUserAsync(LoginRequest request);
 
     /**
      * リフレッシュトークンを使用して新しいアクセストークンを取得する
