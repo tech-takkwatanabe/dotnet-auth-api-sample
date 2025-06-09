@@ -1,8 +1,13 @@
 using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using Api.Domain.VOs.Converters;
 
 namespace Api.Domain.VOs
 {
+  [TypeConverter(typeof(NameTypeConverter))]
+  [JsonConverter(typeof(NameJsonConverter))]
   public class Name : IEquatable<Name>
   {
     [Required]
@@ -15,6 +20,7 @@ namespace Api.Domain.VOs
       {
         throw new ArgumentException("Name cannot be empty.", nameof(value));
       }
+
       if (value.Length > 100)
       {
         throw new ArgumentOutOfRangeException(nameof(value), "Name cannot be longer than 100 characters.");
