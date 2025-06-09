@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Api.Application.UseCases.UserLogin;
 using Api.Application.UseCases.UserRegistration;
 using Api.Domain.DTOs;
 using Api.Domain.VOs;
@@ -9,9 +10,11 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class AuthController(RegisterUserCommandHandler registerUserCommandHandler) : ControllerBase
+public class AuthController(RegisterUserCommandHandler registerUserCommandHandler, LoginUserCommandHandler loginUserCommandHandler) : ControllerBase
 {
   private readonly RegisterUserCommandHandler _registerUserCommandHandler = registerUserCommandHandler;
+  private readonly LoginUserCommandHandler _loginUserCommandHandler = loginUserCommandHandler;
+
 
   [HttpPost("signup")]
   [ProducesResponseType(typeof(SignUpResponse), StatusCodes.Status200OK)]
@@ -40,10 +43,22 @@ public class AuthController(RegisterUserCommandHandler registerUserCommandHandle
   [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status401Unauthorized)]
   [Consumes("application/json")]
-  public Task<IActionResult> Login([FromBody] LoginRequest request)
+  public async Task<IActionResult> Login([FromBody] LoginRequest request)
   {
-    // TODO: 実装
-    return Task.FromResult<IActionResult>(Ok(new AuthResponse("access_token", "refresh_token")));
+    try
+    {
+      var command = new LoginUserCommand(request.Email, request.Password);
+      var result = await _loginUserCommandHandler.HandleAsync(command);
+      if (result.HasValue)
+      {
+        return Ok(new AuthResponse(result.Value.AccessToken, result.Value.RefreshToken, result.Value.UserUuid, "Bearer"));
+      }
+      return Unauthorized(new { message = "Invalid email or password." });
+    }
+    catch (Exception ex)
+    {
+      return BadRequest(new { message = ex.Message });
+    }
   }
 
   [HttpPost("refresh")]
@@ -53,7 +68,8 @@ public class AuthController(RegisterUserCommandHandler registerUserCommandHandle
   public Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
   {
     // TODO: 実装
-    return Task.FromResult<IActionResult>(Ok(new AuthResponse("access_token", "refresh_token")));
+    // AuthResponse に Uuid を渡す必要があります。ここでは仮の Uuid を生成します。
+    return Task.FromResult<IActionResult>(Ok(new AuthResponse("access_token", "refresh_token", Uuid.NewUuid())));
   }
 
   [HttpPost("logout")]
