@@ -25,6 +25,7 @@ public record SignUpResponse(
 public record AuthResponse(
     string AccessToken,
     string RefreshToken,
+    Uuid Uuid,
     string TokenType = "Bearer"
 );
 
