@@ -19,10 +19,8 @@ namespace Api.Domain.VOs.Converters
     {
       if (value is string s)
       {
-        // Create a new Email instance from the string input
         return new Email(s);
       }
-      // Defer to the base implementation for other types
       return base.ConvertFrom(context, culture, value);
     }
 

@@ -18,7 +18,7 @@ namespace Api.Domain.VOs.Converters
           {
             return new Uuid(guidValue);
           }
-          catch (ArgumentException ex) // Uuidコンストラクタのバリデーションエラーをキャッチ
+          catch (ArgumentException ex)
           {
             throw new JsonException($"Error converting value '{uuidString}' to Uuid: {ex.Message}", ex);
           }
@@ -26,7 +26,6 @@ namespace Api.Domain.VOs.Converters
       }
       else if (reader.TokenType == JsonTokenType.Null)
       {
-        // If the JSON token is null, the converter for Uuid should return null.
         return null;
       }
       throw new JsonException($"Expected string to convert to Uuid, but got {reader.TokenType}.");

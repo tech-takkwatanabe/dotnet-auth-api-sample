@@ -10,7 +10,6 @@ namespace Api.Domain.VOs.Converters
   {
     public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
     {
-      // 文字列から Guid への変換をサポート
       return sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
     }
 
@@ -26,10 +25,8 @@ namespace Api.Domain.VOs.Converters
         {
           throw new ArgumentException("Input string cannot be null or whitespace.", nameof(value));
         }
-        // Guid.TryParse を使用して安全に変換
         if (Guid.TryParse(s, out Guid result))
         {
-          // Ensure Uuid is defined elsewhere as a value object wrapping Guid
           return new Uuid(result);
         }
         throw new FormatException("The provided string is not a valid GUID format.");

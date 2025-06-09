@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Globalization;
-using Api.Domain.VOs; // 正しいPassword ValueObjectを参照するために追加
+using Api.Domain.VOs;
 
 namespace Api.Domain.VOs.Converters
 {

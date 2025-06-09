@@ -16,10 +16,9 @@ namespace Api.Domain.VOs.Converters
         {
           try
           {
-            // Console.WriteLine($"DEBUG: PasswordJsonConverter.Read attempting to create Password from '{passwordValue}'"); // デバッグログ
             return new Password(passwordValue);
           }
-          catch (ArgumentException ex) // Passwordコンストラクタのバリデーションエラーをキャッチ
+          catch (ArgumentException ex)
           {
             throw new JsonException($"Error converting value to Password: {ex.Message}", ex);
           }
@@ -35,10 +34,6 @@ namespace Api.Domain.VOs.Converters
 
     public override void Write(Utf8JsonWriter writer, Password value, JsonSerializerOptions options)
     {
-      // Console.WriteLine($"DEBUG: PasswordJsonConverter.Write writing Password value (masked): '{value.ToString()}'"); // デバッグログ
-      // パスワードの平文をレスポンスに含めるべきではありません。
-      // ToString()がマスクされた値を返すことを期待するか、
-      // もしくはこのValueObjectを直接レスポンスに含めない設計を検討してください。
       // ここでは ToString() を使用してマスクされた値を書き込みます。
       writer.WriteStringValue(value.ToString());
     }
