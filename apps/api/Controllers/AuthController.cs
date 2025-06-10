@@ -61,6 +61,22 @@ public class AuthController(RegisterUserCommandHandler registerUserCommandHandle
     }
   }
 
+  [HttpGet("me")]
+  [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+  [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+  public Task<IActionResult> GetCurrentUser()
+  {
+    // 1. Authorization ヘッダーからBearerトークンを取得
+    // 2. トークンが有効な場合は、payloadからsub=UUIDを取得する
+    // 3. ユーザー情報を UserResponse として返す
+    // TODO: 実装
+    // 仮のデータをValueObjectで作成
+    var uuid = new Uuid(Guid.NewGuid()); // 仮のUUIDを生成
+    var email = new Email("user@example.com"); // 仮のEmail
+    var name = new Name("username"); // 仮のName
+    return Task.FromResult<IActionResult>(Ok(new UserResponse(uuid, email, name)));
+  }
+
   [HttpPost("refresh")]
   [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -79,18 +95,5 @@ public class AuthController(RegisterUserCommandHandler registerUserCommandHandle
   {
     // TODO: 実装
     return Task.FromResult<IActionResult>(Ok(new { message = "Logged out successfully!!" }));
-  }
-
-  [HttpGet("me")]
-  [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
-  [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-  public Task<IActionResult> GetCurrentUser()
-  {
-    // TODO: 実装
-    // 仮のデータをValueObjectで作成
-    var uuid = new Uuid(Guid.NewGuid()); // 仮のUUIDを生成
-    var email = new Email("user@example.com"); // 仮のEmail
-    var name = new Name("username"); // 仮のName
-    return Task.FromResult<IActionResult>(Ok(new UserResponse(uuid, email, name)));
   }
 }
