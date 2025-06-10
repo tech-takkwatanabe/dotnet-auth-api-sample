@@ -57,7 +57,7 @@ namespace Api.Infrastructure.Security
       return tokenHandler.WriteToken(token);
     }
 
-    public Uuid? ValidateTokenAndGetUserId(string? token)
+    public Uuid? ValidateTokenAndGetSub(string? token)
     {
       var principal = GetPrincipalFromToken(token, validateLifetime: true);
       if (principal == null) return null;

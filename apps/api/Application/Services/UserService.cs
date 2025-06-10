@@ -146,7 +146,7 @@ namespace Api.Application.Services
     public async Task<string?> RefreshAccessTokenAsync(string refreshTokenValue)
     {
       // TODO: Implement actual logic
-      // 1. var userUuid = _jwtUtils.ValidateTokenAndGetUserId(refreshTokenValue); // 'sub' クレームから User.Uuid を取得
+      // 1. var userUuid = _jwtUtils.ValidateTokenAndGetSub(refreshTokenValue); // 'sub' クレームから User.Uuid を取得
       // 2. DBからリフレッシュトークンエンティティを取得 (_refreshTokenRepository.FindByUuidAsync など)
       // 3. トークンの有効期限や失効状態をチェック
       // 4. ユーザー存在チェック (if (userUuid.HasValue) await _userRepository.FindByUuidAsync(userUuid.Value);)

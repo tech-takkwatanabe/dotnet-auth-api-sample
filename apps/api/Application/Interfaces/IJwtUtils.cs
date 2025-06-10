@@ -7,7 +7,7 @@ namespace Api.Application.Interfaces
   {
     string GenerateAccessToken(Uuid userUuid);
     string GenerateRefreshToken(Uuid userUuid);
-    Uuid? ValidateTokenAndGetUserId(string? token);
+    Uuid? ValidateTokenAndGetSub(string? token);
     ClaimsPrincipal? GetPrincipalFromExpiredToken(string? token);
   }
 }
