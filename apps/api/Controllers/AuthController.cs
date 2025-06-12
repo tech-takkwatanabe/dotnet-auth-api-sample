@@ -1,19 +1,27 @@
 using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Api.Application.Interfaces;
 using Api.Application.UseCases.UserLogin;
 using Api.Application.UseCases.UserRegistration;
 using Api.Domain.DTOs;
 using Api.Domain.VOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class AuthController(RegisterUserCommandHandler registerUserCommandHandler, LoginUserCommandHandler loginUserCommandHandler) : ControllerBase
+public class AuthController(
+    RegisterUserCommandHandler registerUserCommandHandler,
+    LoginUserCommandHandler loginUserCommandHandler,
+    IUserService userService) : ControllerBase
 {
   private readonly RegisterUserCommandHandler _registerUserCommandHandler = registerUserCommandHandler;
   private readonly LoginUserCommandHandler _loginUserCommandHandler = loginUserCommandHandler;
+  private readonly IUserService _userService = userService;
 
 
   [HttpPost("signup")]
@@ -62,19 +70,37 @@ public class AuthController(RegisterUserCommandHandler registerUserCommandHandle
   }
 
   [HttpGet("me")]
+  [Authorize]
   [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-  public Task<IActionResult> GetCurrentUser()
+  [ProducesResponseType(StatusCodes.Status404NotFound)]
+  public async Task<IActionResult> GetCurrentUser()
   {
-    // 1. Authorization ヘッダーからBearerトークンを取得
-    // 2. トークンが有効な場合は、payloadからsub=UUIDを取得する
-    // 3. ユーザー情報を UserResponse として返す
-    // TODO: 実装
-    // 仮のデータをValueObjectで作成
-    var uuid = new Uuid(Guid.NewGuid()); // 仮のUUIDを生成
-    var email = new Email("user@example.com"); // 仮のEmail
-    var name = new Name("username"); // 仮のName
-    return Task.FromResult<IActionResult>(Ok(new UserResponse(uuid, email, name)));
+    // HttpContext.User から認証済みユーザーのクレームを取得
+    // JwtRegisteredClaimNames.Sub には、トークン生成時に設定したユーザーID (UUID) が格納されている
+    var userIdString = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+    if (string.IsNullOrEmpty(userIdString))
+    {
+      // 通常、[Authorize]属性により、認証されていない場合はここに到達しない
+      return Unauthorized(new { message = "User ID not found in token." });
+    }
+
+    if (!Guid.TryParse(userIdString, out var userIdGuid))
+    {
+      // トークン内のユーザーIDが不正な形式の場合
+      return BadRequest(new { message = "Invalid user ID format in token." });
+    }
+
+    var userUuid = new Uuid(userIdGuid);
+    var user = await _userService.GetUserByUuidAsync(userUuid);
+
+    if (user == null)
+    {
+      return NotFound(new { message = "User not found." });
+    }
+
+    return Ok(new UserResponse(user.Uuid, user.Email, user.Name));
   }
 
   [HttpPost("refresh")]

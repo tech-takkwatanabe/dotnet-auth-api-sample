@@ -100,6 +100,10 @@ builder.Services.AddAuthentication(options =>
      ValidateIssuerSigningKey = true,
      ClockSkew = TimeSpan.Zero
    };
+
+   // JWTクレームタイプのマッピングを無効化し、"sub" などの標準クレーム名が変更されないようにする
+   // これにより、User.FindFirstValue(JwtRegisteredClaimNames.Sub) で期待通りに値を取得できる
+   options.MapInboundClaims = false;
  });
 
 // Add services to the container.
@@ -124,8 +128,6 @@ builder.Services.AddScoped<LoginUserCommandHandler>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-// IPasswordHasher の実装クラスを登録します。
-// 実装クラスが PasswordHasher で、Api.Infrastructure.Security 名前空間にあると仮定しています。
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
 var app = builder.Build();
@@ -140,7 +142,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseRouting();
 app.UseHttpsRedirection();
-app.UseAuthentication(); // 認証ミドルウェアを UseAuthorization の前に配置
+app.UseAuthentication();
 app.UseCors();
 app.UseAuthorization();
 app.MapControllers();

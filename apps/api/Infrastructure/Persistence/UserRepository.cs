@@ -18,8 +18,7 @@ namespace Api.Infrastructure.Persistence
 
     public async Task<UserEntity?> FindByUuidAsync(Uuid uuid)
     {
-      return await _context.Users
-                          .FirstOrDefaultAsync(u => u.Uuid.Value == uuid.Value); // UserEntity.Uuidプロパティで検索
+      return await _context.Users.FirstOrDefaultAsync(u => u.Uuid == uuid);
     }
 
     public async Task SaveAsync(UserEntity user)
