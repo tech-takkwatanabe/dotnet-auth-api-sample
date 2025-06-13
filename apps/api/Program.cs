@@ -9,11 +9,13 @@ using Api.Application.UseCases.UserLogin;
 using Api.Application.UseCases.UserRegistration;
 using Api.Domain.Repositories;
 using Api.Infrastructure.Configuration;
+using Api.Infrastructure.Middleware;
 using Api.Infrastructure.Persistence;
 using Api.Infrastructure.Security;
 using Api.Infrastructure.Settings;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
@@ -105,6 +107,9 @@ builder.Services.AddAuthentication(options =>
    // JWTクレームタイプのマッピングを無効化し、"sub" などの標準クレーム名が変更されないようにする
    // これにより、User.FindFirstValue(JwtRegisteredClaimNames.Sub) で期待通りに値を取得できる
    options.MapInboundClaims = false;
+
+   options.Events = new JwtBearerEvents
+   { OnChallenge = AuthenticationEvents.HandleChallengeAsync };
  });
 
 // Add services to the container.
