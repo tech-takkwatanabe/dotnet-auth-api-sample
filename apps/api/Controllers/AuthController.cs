@@ -3,7 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Api.Application.Interfaces;
-using Api.Application.UseCases.UserLogin;
+using Api.Application.UseCases.GetCurrentUser;
 using Api.Application.UseCases.UserRegistration;
 using Api.Domain.DTOs;
 using Api.Domain.VOs;
@@ -12,17 +12,20 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
 
+using Api.Application.UseCases.UserLogin;
+
 [ApiController]
 [Route("api/auth")]
 public class AuthController(
     RegisterUserCommandHandler registerUserCommandHandler,
     LoginUserCommandHandler loginUserCommandHandler,
-    IUserService userService) : ControllerBase
+    GetCurrentUserCommandHandler getCurrentUserCommandHandler,
+    IUserService userService /* IUserService は GetCurrentUserCommandHandler に内包されるため、将来的には削除検討可能 */) : ControllerBase
 {
   private readonly RegisterUserCommandHandler _registerUserCommandHandler = registerUserCommandHandler;
   private readonly LoginUserCommandHandler _loginUserCommandHandler = loginUserCommandHandler;
-  private readonly IUserService _userService = userService;
-
+  private readonly GetCurrentUserCommandHandler _getCurrentUserCommandHandler = getCurrentUserCommandHandler;
+  private readonly IUserService _userService = userService; // GetCurrentUserCommandHandler が IUserService を使用するため、この直接参照は不要になる可能性があります
 
   [HttpPost("signup")]
   [ProducesResponseType(typeof(SignUpResponse), StatusCodes.Status200OK)]
@@ -93,14 +96,15 @@ public class AuthController(
     }
 
     var userUuid = new Uuid(userIdGuid);
-    var user = await _userService.GetUserByUuidAsync(userUuid);
+    var command = new GetCurrentUserCommand(userUuid);
+    var userResponse = await _getCurrentUserCommandHandler.HandleAsync(command);
 
-    if (user == null)
+    if (userResponse == null)
     {
       return NotFound(new { message = "User not found." });
     }
 
-    return Ok(new UserResponse(user.Uuid, user.Email, user.Name));
+    return Ok(userResponse);
   }
 
   [HttpPost("refresh")]
