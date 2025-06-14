@@ -29,46 +29,59 @@ namespace Api.Infrastructure.Security
 
     public string GenerateAccessToken(Uuid userId)
     {
-      return GenerateToken(userId, DateTime.UtcNow.AddSeconds(_jwtSettings.AccessTokenExpirationSeconds));
+      // GenerateTokenがタプルを返すようになったため、トークン文字列のみを取得
+      var (token, _) = GenerateToken(userId, DateTime.UtcNow.AddSeconds(_jwtSettings.AccessTokenExpirationSeconds));
+      return token;
     }
 
-    public string GenerateRefreshToken(Uuid userId)
+    public (string Token, Uuid Jti) GenerateRefreshToken(Uuid userId)
     {
-      return GenerateToken(userId, DateTime.UtcNow.AddSeconds(_jwtSettings.RefreshTokenExpirationSeconds));
+      return GenerateToken(userId, DateTime.UtcNow.AddSeconds(_jwtSettings.RefreshTokenExpirationSeconds), true);
     }
 
-    private string GenerateToken(Uuid userId, DateTime expires)
+    // JTIも生成して返すように変更
+    private (string Token, Uuid Jti) GenerateToken(Uuid userId, DateTime expires, bool isRefreshToken = false)
     {
       var tokenHandler = new JwtSecurityTokenHandler();
       var key = Encoding.ASCII.GetBytes(_jwtSettings.Key);
+      var jti = Guid.NewGuid(); // JTIを生成
       var tokenDescriptor = new SecurityTokenDescriptor
       {
         Subject = new ClaimsIdentity(new[]
           {
             new Claim(JwtRegisteredClaimNames.Sub, userId.Value.ToString()),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Jti, jti.ToString()) // メソッド内で生成したjtiを使用
           }),
+        // Subject = new ClaimsIdentity(claims),
         Expires = expires,
         Issuer = _jwtSettings.Issuer,
         Audience = _jwtSettings.Audience,
         SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
       };
       SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
-      return tokenHandler.WriteToken(token);
+      return (tokenHandler.WriteToken(token), new Uuid(jti));
     }
 
-    public Uuid? ValidateTokenAndGetSub(string? token)
+    public (Uuid? Sub, Uuid? Jti) ValidateTokenAndGetSubAndJti(string? token)
     {
       var principal = GetPrincipalFromToken(token, validateLifetime: true);
-      if (principal == null) return null;
+      if (principal == null) return (null, null);
 
-      var userIdClaim = principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-      if (string.IsNullOrEmpty(userIdClaim))
+      var subClaim = principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+      if (string.IsNullOrEmpty(subClaim))
       {
-        userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        // ASP.NET Core Identity のデフォルトの NameIdentifier もフォールバックとして確認 (通常は不要)
+        subClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
       }
-      return Guid.TryParse(userIdClaim, out var userIdGuid) ? new Uuid(userIdGuid) : null;
+
+      var jtiClaim = principal.FindFirst(JwtRegisteredClaimNames.Jti)?.Value;
+
+      Uuid? sub = Guid.TryParse(subClaim, out var subGuid) ? new Uuid(subGuid) : null;
+      Uuid? jti = Guid.TryParse(jtiClaim, out var jtiGuid) ? new Uuid(jtiGuid) : null;
+
+      return (sub, jti);
     }
+
 
     public ClaimsPrincipal? GetPrincipalFromExpiredToken(string? token)
     {

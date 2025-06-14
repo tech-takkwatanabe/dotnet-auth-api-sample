@@ -13,9 +13,10 @@ namespace Api.Infrastructure.Persistence
     private readonly IDatabase _redis = redisConnection.GetDatabase();
     private readonly TimeSpan _tokenExpiry = tokenExpiry ?? TimeSpan.FromDays(7);
 
-    public async Task<RefreshTokenEntity?> FindByUuidAsync(Uuid uuid)
+    // JTI (JWT ID) を使用してリフレッシュトークンを検索します。
+    public async Task<RefreshTokenEntity?> FindByJtiAsync(Uuid jti)
     {
-      var tokenKey = GetRedisKey(uuid);
+      var tokenKey = GetRedisKeyForJti(jti);
       var tokenJson = await _redis.StringGetAsync(tokenKey);
       if (tokenJson.IsNullOrEmpty)
       {
@@ -28,7 +29,8 @@ namespace Api.Infrastructure.Persistence
 
     public async Task SaveAsync(RefreshTokenEntity refreshToken)
     {
-      var tokenKey = GetRedisKey(refreshToken.Id);
+      // refreshToken.Id には JTI が設定されていることを前提とします。
+      var tokenKey = GetRedisKeyForJti(refreshToken.Id);
       // RefreshTokenEntityをJSONにシリアライズ
       // System.Text.Json を使用する場合
       var tokenJson = JsonSerializer.Serialize(refreshToken);
@@ -41,15 +43,17 @@ namespace Api.Infrastructure.Persistence
       await _redis.StringSetAsync(tokenKey, tokenJson, finalExpiry);
     }
 
-    public async Task DeleteByUuidAsync(Uuid uuid)
+    // JTI (JWT ID) を使用してリフレッシュトークンを削除します。
+    public async Task DeleteByJtiAsync(Uuid jti)
     {
-      var tokenKey = GetRedisKey(uuid);
+      var tokenKey = GetRedisKeyForJti(jti);
       await _redis.KeyDeleteAsync(tokenKey);
     }
 
-    private static string GetRedisKey(Uuid tokenId)
+    // JTIを元にRedisのキーを生成します。
+    private static string GetRedisKeyForJti(Uuid jti)
     {
-      return $"refreshtoken:{tokenId.Value}";
+      return $"refreshtoken:jti:{jti.Value}"; // JTIであることをキーに含めることで、以前の形式と区別
     }
   }
 }

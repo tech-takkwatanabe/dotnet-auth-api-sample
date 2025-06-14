@@ -6,8 +6,8 @@ namespace Api.Domain.Repositories
 {
   public interface IRefreshTokenRepository
   {
+    Task<RefreshTokenEntity?> FindByJtiAsync(Uuid jti);
     Task SaveAsync(RefreshTokenEntity refreshToken);
-    Task<RefreshTokenEntity?> FindByUuidAsync(Uuid uuid);
-    Task DeleteByUuidAsync(Uuid uuid);
+    Task DeleteByJtiAsync(Uuid jti);
   }
 }

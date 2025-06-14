@@ -128,12 +128,14 @@ namespace Api.Application.Services
       var accessToken = _jwtUtils.GenerateAccessToken(user.Uuid);
 
       // 4. リフレッシュトークンの生成と保存
-      var refreshTokenString = _jwtUtils.GenerateRefreshToken(user.Uuid);
+      // IJwtUtils.GenerateRefreshToken が (string Token, DomainUuid Jti) を返すように変更することを想定
+      var (refreshTokenString, refreshTokenJti) = _jwtUtils.GenerateRefreshToken(user.Uuid);
       var expiresAt = DateTime.UtcNow.AddSeconds(_jwtSettings.RefreshTokenExpirationSeconds);
 
-      // userId は user.Uuid を使用します。
-      var refreshToken = new RefreshTokenEntity(user.Uuid, refreshTokenString, user.Uuid, expiresAt);
+      // RefreshTokenEntityのIdにはトークン固有のID (JTI) を使用し、UserIdでユーザーを紐付ける
+      var refreshToken = new RefreshTokenEntity(refreshTokenJti, refreshTokenString, user.Uuid, expiresAt);
       await _refreshTokenRepository.SaveAsync(refreshToken);
+      // フロントエンドには新しいリフレッシュトークン文字列を返す
 
       return (accessToken, refreshTokenString, user.Uuid);
     }
@@ -147,17 +149,17 @@ namespace Api.Application.Services
     public async Task<(string AccessToken, string RefreshToken, DomainUuid UserUuid)?> RefreshAccessTokenAsync(string refreshTokenValue)
     {
       // 1. リフレッシュトークンからユーザーUUIDを検証・取得
-      // Compiler error CS0029 indicates _jwtUtils.ValidateTokenAndGetSub returns Api.Domain.VOs.Uuid (aliased as DomainUuid).
-      // Assuming DomainUuid is a class and can be null if validation fails or sub is not found.
-      DomainUuid userUuidFromToken = _jwtUtils.ValidateTokenAndGetSub(refreshTokenValue);
+      // IJwtUtils.ValidateTokenAndGetSubAndJti が (DomainUuid? Sub, DomainUuid? Jti) を返すように変更することを想定
+      var (userUuidFromToken, jtiFromToken) = _jwtUtils.ValidateTokenAndGetSubAndJti(refreshTokenValue);
 
-      if (userUuidFromToken == null)
+      if (userUuidFromToken == null || jtiFromToken == null)
       {
         return null; // トークンが無効または不正
       }
 
-      // 2. リフレッシュトークンをリポジトリから取得
-      var storedRefreshToken = await _refreshTokenRepository.FindByUuidAsync(userUuidFromToken);
+      // 2. リフレッシュトークンをリポジトリから取得 (IDとしてJTIを使用)
+      // JTIを使用してリフレッシュトークンを検索 (メソッド名はIRefreshTokenRepositoryでFindByJtiAsyncに変更済み)
+      var storedRefreshToken = await _refreshTokenRepository.FindByJtiAsync(jtiFromToken);
 
       if (storedRefreshToken == null)
       {
@@ -166,8 +168,8 @@ namespace Api.Application.Services
 
       // storedRefreshToken の検証:
       // - トークン文字列が一致すること (リプレイアタック対策)
-      // - UserId がトークンから取得したUUIDと一致すること (念のため)
-      // - 失効していないこと
+      // - UserId がトークンから取得したUUIDと一致すること
+      // - (オプション) IsRevoked フラグのチェック (必要であればRefreshTokenEntityに追加)
       // - 有効期限内であること
       if (storedRefreshToken.Token != refreshTokenValue ||
           storedRefreshToken.UserId != userUuidFromToken ||
@@ -187,14 +189,14 @@ namespace Api.Application.Services
       var newAccessToken = _jwtUtils.GenerateAccessToken(user.Uuid); // user.Uuid は DomainUuid 型
 
       // 5. リフレッシュトークンのローテーション: 古いトークンを削除し、新しいトークンを生成・保存
-      await _refreshTokenRepository.DeleteByUuidAsync(userUuidFromToken); // 古いリフレッシュトークンを削除 (Id = userUuidFromToken)
+      // JTIを使用して古いリフレッシュトークンを削除 (メソッド名はIRefreshTokenRepositoryでDeleteByJtiAsyncに変更済み)
+      await _refreshTokenRepository.DeleteByJtiAsync(jtiFromToken);
 
-      var newRefreshTokenString = _jwtUtils.GenerateRefreshToken(user.Uuid);
+      // IJwtUtils.GenerateRefreshToken が (string Token, DomainUuid Jti) を返すように変更することを想定
+      var (newRefreshTokenString, newRefreshTokenJti) = _jwtUtils.GenerateRefreshToken(user.Uuid);
       var newExpiresAt = DateTime.UtcNow.AddSeconds(_jwtSettings.RefreshTokenExpirationSeconds);
-      // RefreshTokenEntityのIdには、リフレッシュトークンを識別するための一意なIDを設定することが推奨されますが、
-      // 現在の実装ではユーザーUUIDをキーとして保存しているため、それに合わせます。
-      // 本来であれば、RefreshTokenEntityのIdはトークン自体のID（例：新しいUUID）とし、UserIdでユーザーを紐づけるべきです。
-      var newRefreshToken = new RefreshTokenEntity(user.Uuid, newRefreshTokenString, user.Uuid, newExpiresAt);
+      // 新しいRefreshTokenEntityのIdには新しいJTIを使用
+      var newRefreshToken = new RefreshTokenEntity(newRefreshTokenJti, newRefreshTokenString, user.Uuid, newExpiresAt);
       await _refreshTokenRepository.SaveAsync(newRefreshToken);
 
       return (newAccessToken, newRefreshTokenString, user.Uuid);
