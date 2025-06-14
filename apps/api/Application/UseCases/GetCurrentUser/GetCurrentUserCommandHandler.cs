@@ -10,7 +10,7 @@ public class GetCurrentUserCommandHandler(IUserService userService)
 
   public async Task<UserResponse?> HandleAsync(GetCurrentUserCommand command)
   {
-    var user = await _userService.GetUserByUuidAsync(command.UserId);
+    var user = await _userService.GetUserByUuidAsync(command.UserUuid);
 
     if (user == null)
     {
