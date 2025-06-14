@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Api.Application.Interfaces;
 using Api.Application.UseCases.GetCurrentUser;
+using Api.Application.UseCases.UserLogin;
 using Api.Application.UseCases.UserRegistration;
 using Api.Domain.DTOs;
 using Api.Domain.VOs;
@@ -11,8 +12,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
-
-using Api.Application.UseCases.UserLogin;
 
 [ApiController]
 [Route("api/auth")]
