@@ -6,14 +6,13 @@ namespace Api.Application.Interfaces
   public interface IJwtUtils
   {
     string GenerateAccessToken(Uuid userUuid);
-    // RefreshToken生成時にJTIも返すように変更
+    // RefreshToken生成時にJTIも返す
     (string Token, Uuid Jti) GenerateRefreshToken(Uuid userUuid);
 
-    // トークン検証時にSubとJTIの両方を返すように変更
-    // メソッド名を変更して意図を明確化
+    // トークン検証時にSubとJTIの両方を返す
     (Uuid? Sub, Uuid? Jti) ValidateTokenAndGetSubAndJti(string? token);
 
-    // 有効期限切れトークンからPrincipalを取得するメソッド (これは変更なし)
+    // 有効期限切れトークンからPrincipalを取得するメソッド
     ClaimsPrincipal? GetPrincipalFromExpiredToken(string? token);
   }
 }

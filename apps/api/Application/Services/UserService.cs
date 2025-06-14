@@ -8,7 +8,7 @@ using Api.Domain.VOs;
 using Api.Infrastructure.Settings;
 using Microsoft.Extensions.Options;
 using UUIDNext;
-using DomainUuid = Api.Domain.VOs.Uuid; // Uuidのエイリアスを定義
+using DomainUuid = Api.Domain.VOs.Uuid;
 
 namespace Api.Application.Services
 {
@@ -17,14 +17,14 @@ namespace Api.Application.Services
       IRefreshTokenRepository refreshTokenRepository,
       IJwtUtils jwtUtils,
       IPasswordHasher passwordHasher,
-      IOptions<JwtSettings> jwtSettings // JwtSettings をDIで受け取る
+      IOptions<JwtSettings> jwtSettings
         ) : IUserService
   {
     private readonly IUserRepository _userRepository = userRepository;
     private readonly IRefreshTokenRepository _refreshTokenRepository = refreshTokenRepository;
     private readonly IJwtUtils _jwtUtils = jwtUtils;
     private readonly IPasswordHasher _passwordHasher = passwordHasher;
-    private readonly JwtSettings _jwtSettings = jwtSettings.Value; // JwtSettings の値を保持
+    private readonly JwtSettings _jwtSettings = jwtSettings.Value;
 
     /**
      * ユーザーIDからユーザー情報を取得する
@@ -128,14 +128,13 @@ namespace Api.Application.Services
       var accessToken = _jwtUtils.GenerateAccessToken(user.Uuid);
 
       // 4. リフレッシュトークンの生成と保存
-      // IJwtUtils.GenerateRefreshToken が (string Token, DomainUuid Jti) を返すように変更することを想定
+      // IJwtUtils.GenerateRefreshToken が (string Token, DomainUuid Jti) を返す
       var (refreshTokenString, refreshTokenJti) = _jwtUtils.GenerateRefreshToken(user.Uuid);
       var expiresAt = DateTime.UtcNow.AddSeconds(_jwtSettings.RefreshTokenExpirationSeconds);
 
-      // RefreshTokenEntityのIdにはトークン固有のID (JTI) を使用し、UserIdでユーザーを紐付ける
+      // RefreshTokenEntityのIdにはトークン固有のID (JTI) を使用し、User.uuidでユーザーを紐付ける
       var refreshToken = new RefreshTokenEntity(refreshTokenJti, refreshTokenString, user.Uuid, expiresAt);
       await _refreshTokenRepository.SaveAsync(refreshToken);
-      // フロントエンドには新しいリフレッシュトークン文字列を返す
 
       return (accessToken, refreshTokenString, user.Uuid);
     }
@@ -149,7 +148,7 @@ namespace Api.Application.Services
     public async Task<(string AccessToken, string RefreshToken, DomainUuid UserUuid)?> RefreshAccessTokenAsync(string refreshTokenValue)
     {
       // 1. リフレッシュトークンからユーザーUUIDを検証・取得
-      // IJwtUtils.ValidateTokenAndGetSubAndJti が (DomainUuid? Sub, DomainUuid? Jti) を返すように変更することを想定
+      // IJwtUtils.ValidateTokenAndGetSubAndJti が (DomainUuid? Sub, DomainUuid? Jti) を返す
       var (userUuidFromToken, jtiFromToken) = _jwtUtils.ValidateTokenAndGetSubAndJti(refreshTokenValue);
 
       if (userUuidFromToken == null || jtiFromToken == null)
@@ -158,7 +157,7 @@ namespace Api.Application.Services
       }
 
       // 2. リフレッシュトークンをリポジトリから取得 (IDとしてJTIを使用)
-      // JTIを使用してリフレッシュトークンを検索 (メソッド名はIRefreshTokenRepositoryでFindByJtiAsyncに変更済み)
+      // JTIを使用してリフレッシュトークンを検索
       var storedRefreshToken = await _refreshTokenRepository.FindByJtiAsync(jtiFromToken);
 
       if (storedRefreshToken == null)
@@ -186,16 +185,15 @@ namespace Api.Application.Services
       }
 
       // 4. 新しいアクセストークンを生成
-      var newAccessToken = _jwtUtils.GenerateAccessToken(user.Uuid); // user.Uuid は DomainUuid 型
+      var newAccessToken = _jwtUtils.GenerateAccessToken(user.Uuid);
 
       // 5. リフレッシュトークンのローテーション: 古いトークンを削除し、新しいトークンを生成・保存
-      // JTIを使用して古いリフレッシュトークンを削除 (メソッド名はIRefreshTokenRepositoryでDeleteByJtiAsyncに変更済み)
+      // JTIを使用して古いリフレッシュトークンを削除
       await _refreshTokenRepository.DeleteByJtiAsync(jtiFromToken);
 
-      // IJwtUtils.GenerateRefreshToken が (string Token, DomainUuid Jti) を返すように変更することを想定
+      // IJwtUtils.GenerateRefreshToken が (string Token, DomainUuid Jti) を返す
       var (newRefreshTokenString, newRefreshTokenJti) = _jwtUtils.GenerateRefreshToken(user.Uuid);
       var newExpiresAt = DateTime.UtcNow.AddSeconds(_jwtSettings.RefreshTokenExpirationSeconds);
-      // 新しいRefreshTokenEntityのIdには新しいJTIを使用
       var newRefreshToken = new RefreshTokenEntity(newRefreshTokenJti, newRefreshTokenString, user.Uuid, newExpiresAt);
       await _refreshTokenRepository.SaveAsync(newRefreshToken);
 

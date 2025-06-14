@@ -53,7 +53,7 @@ namespace Api.Infrastructure.Persistence
     // JTIを元にRedisのキーを生成します。
     private static string GetRedisKeyForJti(Uuid jti)
     {
-      return $"refreshtoken:jti:{jti.Value}"; // JTIであることをキーに含めることで、以前の形式と区別
+      return $"refreshtoken:jti:{jti.Value}";
     }
   }
 }

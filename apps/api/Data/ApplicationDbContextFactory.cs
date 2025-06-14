@@ -8,9 +8,6 @@ namespace Api.Data
   {
     public ApplicationDbContext CreateDbContext(string[] args)
     {
-      // 現在の構成では、docker-compose.yml が apps/api ディレクトリにあるため、
-      // プロジェクトのルートディレクトリが apps/api になります。
-      // そのため、appsettings.json は自動的に正しく読み込まれます。
       var configuration = new ConfigurationBuilder()
           .SetBasePath(Directory.GetCurrentDirectory())
           .AddJsonFile("appsettings.json")
