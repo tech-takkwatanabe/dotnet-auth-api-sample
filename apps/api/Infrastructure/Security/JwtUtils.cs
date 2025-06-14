@@ -39,7 +39,6 @@ namespace Api.Infrastructure.Security
       return GenerateToken(userId, DateTime.UtcNow.AddSeconds(_jwtSettings.RefreshTokenExpirationSeconds), true);
     }
 
-    // JTIも生成して返すように変更
     private (string Token, Uuid Jti) GenerateToken(Uuid userId, DateTime expires, bool isRefreshToken = false)
     {
       var tokenHandler = new JwtSecurityTokenHandler();
@@ -52,7 +51,6 @@ namespace Api.Infrastructure.Security
             new Claim(JwtRegisteredClaimNames.Sub, userId.Value.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, jti.ToString()) // メソッド内で生成したjtiを使用
           }),
-        // Subject = new ClaimsIdentity(claims),
         Expires = expires,
         Issuer = _jwtSettings.Issuer,
         Audience = _jwtSettings.Audience,
