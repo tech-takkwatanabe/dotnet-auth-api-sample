@@ -86,14 +86,7 @@ namespace Api.Application.Services
       };
 
       // 5. ユーザーの保存
-      try
-      {
-        await _userRepository.SaveAsync(newUser);
-      }
-      catch (Exception ex)
-      {
-        throw new InvalidOperationException("Failed to register user.", ex);
-      }
+      await _userRepository.SaveAsync(newUser);
     }
 
     /**
