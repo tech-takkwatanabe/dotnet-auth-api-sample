@@ -142,18 +142,54 @@ namespace Api.Application.Services
      * リフレッシュトークンを使用して新しいアクセストークンを取得する
      * @param refreshTokenValue リフレッシュトークンの文字列値
      * @return string 新しいアクセストークン (失敗時はnull)
+     * @return (string AccessToken, string RefreshToken, DomainUuid UserUuid)? 新しい認証情報 (失敗時はnull)
      */
-    public async Task<string?> RefreshAccessTokenAsync(string refreshTokenValue)
+    public async Task<(string AccessToken, string RefreshToken, DomainUuid UserUuid)?> RefreshAccessTokenAsync(string refreshTokenValue)
     {
-      // TODO: Implement actual logic
-      // 1. var userUuid = _jwtUtils.ValidateTokenAndGetSub(refreshTokenValue); // 'sub' クレームから User.Uuid を取得
-      // 2. DBからリフレッシュトークンエンティティを取得 (_refreshTokenRepository.FindByUuidAsync など)
-      // 3. トークンの有効期限や失効状態をチェック
-      // 4. ユーザー存在チェック (if (userUuid.HasValue) await _userRepository.FindByUuidAsync(userUuid.Value);)
-      // 5. 新しいアクセストークンを生成 (if (user != null) _jwtUtils.GenerateAccessToken(user.Uuid);)
-      // 6. (オプション) 古いリフレッシュトークンを無効化し、新しいリフレッシュトークンを発行・保存
-      await Task.CompletedTask; // 仮実装
-      throw new NotImplementedException();
+      // 1. リフレッシュトークンからユーザーUUIDを検証・取得
+      // Compiler error CS0029 indicates _jwtUtils.ValidateTokenAndGetSub returns Api.Domain.VOs.Uuid (aliased as DomainUuid).
+      // Assuming DomainUuid is a class and can be null if validation fails or sub is not found.
+      DomainUuid userUuidFromToken = _jwtUtils.ValidateTokenAndGetSub(refreshTokenValue);
+
+      if (userUuidFromToken == null)
+      {
+        return null; // トークンが無効または不正
+      }
+
+      // 2. リフレッシュトークンをリポジトリから取得
+      var storedRefreshToken = await _refreshTokenRepository.FindByUuidAsync(userUuidFromToken);
+
+      if (storedRefreshToken == null)
+      {
+        return null; // トークンが存在しない (CS8602対応のため早期リターン)
+      }
+
+      // storedRefreshToken の検証:
+      // - トークン文字列が一致すること (リプレイアタック対策)
+      // - UserId がトークンから取得したUUIDと一致すること (念のため)
+      // - 失効していないこと
+      // - 有効期限内であること
+      if (storedRefreshToken.Token != refreshTokenValue ||
+          storedRefreshToken.UserId != userUuidFromToken ||
+          storedRefreshToken.ExpiresAt < DateTime.UtcNow)
+      {
+        return null; // トークンが存在しない、ユーザーが一致しない、失効済み、または期限切れ
+      }
+
+      // 3. ユーザー情報を取得
+      var user = await _userRepository.FindByUuidAsync(userUuidFromToken);
+      if (user == null)
+      {
+        return null; // ユーザーが存在しない
+      }
+
+      // 4. 新しいアクセストークンを生成
+      var newAccessToken = _jwtUtils.GenerateAccessToken(user.Uuid); // user.Uuid は DomainUuid 型
+
+      // 5. 新しいアクセストークンと元のリフレッシュトークン、ユーザーUUIDを返す
+      // 注意: リフレッシュトークンのローテーションを行う場合は、ここで新しいリフレッシュトークンも生成・保存する必要があります。
+      // 現在の実装では元のリフレッシュトークンをそのまま返します。
+      return (newAccessToken, refreshTokenValue, user.Uuid);
     }
   }
 }

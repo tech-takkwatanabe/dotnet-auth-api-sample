@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Api.Domain.DTOs;
 using Api.Domain.Entities;
 using Api.Domain.VOs;
-// using Api.Application.DTOs; // DTOsの名前空間を想定
+using DomainUuid = Api.Domain.VOs.Uuid;
 
 namespace Api.Application.Interfaces
 {
@@ -44,6 +44,6 @@ namespace Api.Application.Interfaces
      * @param refreshTokenValue リフレッシュトークンの文字列値
      * @return string 新しいアクセストークン (失敗時はnull)
      */
-    Task<string?> RefreshAccessTokenAsync(string refreshTokenValue);
+    Task<(string AccessToken, string RefreshToken, DomainUuid UserUuid)?> RefreshAccessTokenAsync(string refreshTokenValue);
   }
 }
