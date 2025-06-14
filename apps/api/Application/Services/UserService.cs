@@ -186,10 +186,18 @@ namespace Api.Application.Services
       // 4. 新しいアクセストークンを生成
       var newAccessToken = _jwtUtils.GenerateAccessToken(user.Uuid); // user.Uuid は DomainUuid 型
 
-      // 5. 新しいアクセストークンと元のリフレッシュトークン、ユーザーUUIDを返す
-      // 注意: リフレッシュトークンのローテーションを行う場合は、ここで新しいリフレッシュトークンも生成・保存する必要があります。
-      // 現在の実装では元のリフレッシュトークンをそのまま返します。
-      return (newAccessToken, refreshTokenValue, user.Uuid);
+      // 5. リフレッシュトークンのローテーション: 古いトークンを削除し、新しいトークンを生成・保存
+      await _refreshTokenRepository.DeleteByUuidAsync(userUuidFromToken); // 古いリフレッシュトークンを削除 (Id = userUuidFromToken)
+
+      var newRefreshTokenString = _jwtUtils.GenerateRefreshToken(user.Uuid);
+      var newExpiresAt = DateTime.UtcNow.AddSeconds(_jwtSettings.RefreshTokenExpirationSeconds);
+      // RefreshTokenEntityのIdには、リフレッシュトークンを識別するための一意なIDを設定することが推奨されますが、
+      // 現在の実装ではユーザーUUIDをキーとして保存しているため、それに合わせます。
+      // 本来であれば、RefreshTokenEntityのIdはトークン自体のID（例：新しいUUID）とし、UserIdでユーザーを紐づけるべきです。
+      var newRefreshToken = new RefreshTokenEntity(user.Uuid, newRefreshTokenString, user.Uuid, newExpiresAt);
+      await _refreshTokenRepository.SaveAsync(newRefreshToken);
+
+      return (newAccessToken, newRefreshTokenString, user.Uuid);
     }
   }
 }
