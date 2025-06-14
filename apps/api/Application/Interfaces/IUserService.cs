@@ -45,5 +45,11 @@ namespace Api.Application.Interfaces
      * @return string 新しいアクセストークン (失敗時はnull)
      */
     Task<(string AccessToken, string RefreshToken, DomainUuid UserUuid)?> RefreshAccessTokenAsync(string refreshTokenValue);
+
+    /**
+     * ユーザーログアウト (リフレッシュトークンを無効化)
+     * @param refreshTokenValue 無効化するリフレッシュトークンの文字列値
+     */
+    Task LogoutAsync(string refreshTokenValue);
   }
 }

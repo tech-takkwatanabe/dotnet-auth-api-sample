@@ -6,6 +6,7 @@ using Api.Application.Interfaces;
 using Api.Application.UseCases.GetCurrentUser;
 using Api.Application.UseCases.RefreshToken;
 using Api.Application.UseCases.UserLogin;
+using Api.Application.UseCases.UserLogout;
 using Api.Application.UseCases.UserRegistration;
 using Api.Domain.DTOs;
 using Api.Domain.VOs;
@@ -21,13 +22,13 @@ public class AuthController(
     LoginUserCommandHandler loginUserCommandHandler,
     GetCurrentUserCommandHandler getCurrentUserCommandHandler,
     RefreshTokenCommandHandler refreshTokenCommandHandler,
-    IUserService userService) : ControllerBase
+    UserLogoutCommandHandler userLogoutCommandHandler) : ControllerBase
 {
   private readonly RegisterUserCommandHandler _registerUserCommandHandler = registerUserCommandHandler;
   private readonly LoginUserCommandHandler _loginUserCommandHandler = loginUserCommandHandler;
   private readonly GetCurrentUserCommandHandler _getCurrentUserCommandHandler = getCurrentUserCommandHandler;
   private readonly RefreshTokenCommandHandler _refreshTokenCommandHandler = refreshTokenCommandHandler;
-  private readonly IUserService _userService = userService;
+  private readonly UserLogoutCommandHandler _userLogoutCommandHandler = userLogoutCommandHandler;
 
   [HttpPost("signup")]
   [ProducesResponseType(typeof(SignUpResponse), StatusCodes.Status200OK)]
@@ -131,9 +132,26 @@ public class AuthController(
   [HttpPost("logout")]
   [ProducesResponseType(StatusCodes.Status200OK)]
   [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-  public Task<IActionResult> Logout()
+  [ProducesResponseType(StatusCodes.Status400BadRequest)]
+  [Consumes("application/json")]
+  public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request)
   {
-    // TODO: 実装
-    return Task.FromResult<IActionResult>(Ok(new { message = "Logged out successfully!!" }));
+    if (string.IsNullOrEmpty(request.RefreshToken))
+    {
+      return BadRequest(new { message = "Refresh token is required." });
+    }
+
+    try
+    {
+      var command = new UserLogoutCommand(request.RefreshToken);
+      await _userLogoutCommandHandler.HandleAsync(command);
+
+      // サーバー側でトークンを削除した後、クライアント側でもローカルストレージ等からトークンを削除することを促す
+      return Ok(new { message = "Logged out successfully. Please clear your local tokens." });
+    }
+    catch (ArgumentException ex) // UserLogoutCommandHandlerからスローされた例外をキャッチ
+    {
+      return BadRequest(new { message = ex.Message, errorCode = "INVALID_REFRESH_TOKEN" });
+    }
   }
 }

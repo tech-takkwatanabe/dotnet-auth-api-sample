@@ -199,5 +199,20 @@ namespace Api.Application.Services
 
       return (newAccessToken, newRefreshTokenString, user.Uuid);
     }
+
+    /**
+     * ユーザーログアウト (リフレッシュトークンを無効化)
+     * @param refreshTokenValue 無効化するリフレッシュトークンの文字列値
+     */
+    public async Task LogoutAsync(string refreshTokenValue)
+    {
+      var (_, jtiFromToken) = _jwtUtils.ValidateTokenAndGetSubAndJti(refreshTokenValue);
+      if (jtiFromToken == null)
+      {
+        // 無効なリフレッシュトークン、またはjtiが取得できなかった場合
+        throw new ArgumentException("Invalid refresh token provided for logout.", nameof(refreshTokenValue));
+      }
+      await _refreshTokenRepository.DeleteByJtiAsync(jtiFromToken);
+    }
   }
 }
