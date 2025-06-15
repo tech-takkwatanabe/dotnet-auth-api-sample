@@ -24,3 +24,11 @@ dotnet add package StackExchange.Redis
 ## Swagger Doc
 
 https://localhost:8443/swagger/index.html
+
+## Create OpenAPI Doc
+
+```bash
+cd apps/api
+mkdir Docs
+curl -k https://localhost:8443/swagger/v1/swagger.json -o Docs/openapi.json
+```
