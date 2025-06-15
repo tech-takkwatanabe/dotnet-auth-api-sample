@@ -15,6 +15,7 @@ using Api.Infrastructure.Middleware;
 using Api.Infrastructure.Persistence;
 using Api.Infrastructure.Security;
 using Api.Infrastructure.Settings;
+using Api.Infrastructure.SwaggerFilters;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
@@ -127,6 +128,20 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
   c.SwaggerDoc("v1", new OpenApiInfo { Title = "Auth API", Version = "v1" });
+
+  // JWT Bearer認証用のセキュリティ定義を追加
+  c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+  {
+    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+    Name = "Authorization",
+    In = ParameterLocation.Header,
+    Type = SecuritySchemeType.Http, // Http, ApiKey, OAuth2, OpenIdConnect
+    Scheme = "bearer", // "bearer" スキームを指定
+    BearerFormat = "JWT" // トークンのフォーマット (オプショナル)
+  });
+
+  // [Authorize] 属性を持つエンドポイントにのみセキュリティ要件を適用するフィルターを追加
+  c.OperationFilter<AuthorizeOperationFilter>();
 });
 
 builder.Services.AddHealthChecks();
