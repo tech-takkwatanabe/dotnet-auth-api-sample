@@ -13,7 +13,8 @@ namespace Api.Domain.VOs
   {
     [Required]
     [EmailAddress]
-    [StringLength(320)]
+    [MinLength(5)]
+    [MaxLength(320)]
     public string Value { get; }
 
     public Email(string value)
@@ -21,6 +22,10 @@ namespace Api.Domain.VOs
       if (string.IsNullOrWhiteSpace(value))
       {
         throw new ArgumentException("Email cannot be empty.", nameof(value));
+      }
+      if (value.Length < 5 || value.Length > 320)
+      {
+        throw new ArgumentOutOfRangeException(nameof(value), "Email must be between 5 and 320 characters long.");
       }
       try
       {

@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using Api.Domain.VOs.Converters;
 
@@ -9,10 +10,12 @@ namespace Api.Domain.VOs
   [JsonConverter(typeof(PasswordJsonConverter))]
   public class Password : IEquatable<Password>
   {
-    public string Value { get; }
-
-    // パスワードの最小長を定義
     private const int MinimumLength = 6;
+
+    [Required]
+    [MinLength(MinimumLength)]
+    [MaxLength(100)]
+    public string Value { get; }
 
     public Password(string value)
     {

@@ -11,7 +11,8 @@ namespace Api.Domain.VOs
   public class Name : IEquatable<Name>
   {
     [Required]
-    [StringLength(100)]
+    [MinLength(1)]
+    [MaxLength(100)]
     public string Value { get; }
 
     public Name(string value)
@@ -20,10 +21,9 @@ namespace Api.Domain.VOs
       {
         throw new ArgumentException("Name cannot be empty.", nameof(value));
       }
-
-      if (value.Length > 100)
+      if (value.Length < 1 || value.Length > 100)
       {
-        throw new ArgumentOutOfRangeException(nameof(value), "Name cannot be longer than 100 characters.");
+        throw new ArgumentOutOfRangeException(nameof(value), "Name must be between 1 and 100 characters long.");
       }
       Value = value;
     }

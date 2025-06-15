@@ -366,7 +366,7 @@
         "properties": {
           "value": {
             "maxLength": 320,
-            "minLength": 0,
+            "minLength": 5,
             "type": "string",
             "format": "email"
           }
@@ -393,18 +393,22 @@
         "properties": {
           "value": {
             "maxLength": 100,
-            "minLength": 0,
+            "minLength": 1,
             "type": "string"
           }
         },
         "additionalProperties": false
       },
       "Password": {
+        "required": [
+          "value"
+        ],
         "type": "object",
         "properties": {
           "value": {
-            "type": "string",
-            "nullable": true
+            "maxLength": 100,
+            "minLength": 6,
+            "type": "string"
           }
         },
         "additionalProperties": false
