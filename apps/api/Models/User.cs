@@ -11,6 +11,7 @@ namespace Api.Models
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
 
+    [Required]
     public Guid Uuid { get; set; }
 
     [Required]
