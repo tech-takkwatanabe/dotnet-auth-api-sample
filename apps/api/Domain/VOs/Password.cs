@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using Api.Configuration;
 using Api.Domain.VOs.Converters;
 
 namespace Api.Domain.VOs
@@ -10,11 +11,9 @@ namespace Api.Domain.VOs
   [JsonConverter(typeof(PasswordJsonConverter))]
   public class Password : IEquatable<Password>
   {
-    private const int MinimumLength = 6;
-
     [Required]
-    [MinLength(MinimumLength)]
-    [MaxLength(100)]
+    [MinLength(Const.PasswordMinLength)]
+    [MaxLength(Const.PasswordMaxLength)]
     public string Value { get; }
 
     public Password(string value)
@@ -23,9 +22,9 @@ namespace Api.Domain.VOs
       {
         throw new ArgumentException("Password cannot be empty.", nameof(Password));
       }
-      if (value.Length < MinimumLength)
+      if (value.Length < Const.PasswordMinLength)
       {
-        throw new ArgumentException($"Password must be at least {MinimumLength} characters long.", nameof(Password));
+        throw new ArgumentException($"Password must be at least {Const.PasswordMinLength} characters long.", nameof(Password));
       }
       Value = value;
     }

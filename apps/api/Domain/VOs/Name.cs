@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using Api.Configuration;
 using Api.Domain.VOs.Converters;
 
 namespace Api.Domain.VOs
@@ -11,8 +12,8 @@ namespace Api.Domain.VOs
   public class Name : IEquatable<Name>
   {
     [Required]
-    [MinLength(1)]
-    [MaxLength(100)]
+    [MinLength(Const.NameMinLength)]
+    [MaxLength(Const.NameMaxLength)]
     public string Value { get; }
 
     public Name(string value)
@@ -21,9 +22,9 @@ namespace Api.Domain.VOs
       {
         throw new ArgumentException("Name cannot be empty.", nameof(value));
       }
-      if (value.Length < 1 || value.Length > 100)
+      if (value.Length < Const.NameMinLength || value.Length > Const.NameMaxLength)
       {
-        throw new ArgumentOutOfRangeException(nameof(value), "Name must be between 1 and 100 characters long.");
+        throw new ArgumentOutOfRangeException(nameof(value), $"Name must be between {Const.NameMinLength} and {Const.NameMaxLength} characters long.");
       }
       Value = value;
     }

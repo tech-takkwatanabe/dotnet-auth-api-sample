@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Api.Configuration;
 
 namespace Api.Models
 {
@@ -13,16 +14,16 @@ namespace Api.Models
     public Guid Uuid { get; set; }
 
     [Required]
-    [StringLength(100)]
+    [StringLength(Const.NameMaxLength)]
     public string Name { get; set; } = string.Empty;
 
     [Required]
     [EmailAddress]
-    [StringLength(320)]
+    [StringLength(Const.EmailMaxLength)]
     public string Email { get; set; } = string.Empty;
 
     [Required]
-    [StringLength(255)]
+    [StringLength(Const.PasswordHashMaxLength)]
     public string PasswordHash { get; set; } = string.Empty;
 
     [Required]

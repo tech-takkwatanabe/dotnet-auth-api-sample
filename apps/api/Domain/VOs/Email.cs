@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Mail;
 using System.Text.Json.Serialization;
+using Api.Configuration;
 using Api.Domain.VOs.Converters;
 
 namespace Api.Domain.VOs
@@ -13,8 +14,8 @@ namespace Api.Domain.VOs
   {
     [Required]
     [EmailAddress]
-    [MinLength(5)]
-    [MaxLength(320)]
+    [MinLength(Const.EmailMinLength)]
+    [MaxLength(Const.EmailMaxLength)]
     public string Value { get; }
 
     public Email(string value)
@@ -23,9 +24,9 @@ namespace Api.Domain.VOs
       {
         throw new ArgumentException("Email cannot be empty.", nameof(value));
       }
-      if (value.Length < 5 || value.Length > 320)
+      if (value.Length < Const.EmailMinLength || value.Length > Const.EmailMaxLength)
       {
-        throw new ArgumentOutOfRangeException(nameof(value), "Email must be between 5 and 320 characters long.");
+        throw new ArgumentOutOfRangeException(nameof(value), $"Email must be between {Const.EmailMinLength} and {Const.EmailMaxLength} characters long.");
       }
       try
       {
