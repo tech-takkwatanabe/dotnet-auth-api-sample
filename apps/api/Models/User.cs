@@ -23,7 +23,7 @@ namespace Api.Models
     public string Email { get; set; } = string.Empty;
 
     [Required]
-    [StringLength(Const.PasswordHashMaxLength)]
+    [StringLength(255)]
     public string PasswordHash { get; set; } = string.Empty;
 
     [Required]

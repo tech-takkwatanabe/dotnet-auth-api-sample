@@ -13,8 +13,5 @@ namespace Api.Configuration
     // Password (Plain text)
     public const int PasswordMinLength = 6;
     public const int PasswordMaxLength = 100;
-
-    // PasswordHash (Stored in DB)
-    public const int PasswordHashMaxLength = 255;
   }
 }
