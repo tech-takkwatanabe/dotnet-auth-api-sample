@@ -63,14 +63,19 @@ REDIS_CONNECTION_STRING="localhost:6379"
 
 ### 3. 開発用SSL証明書の準備 (オプション)
 HTTPSでローカル開発を行う場合、自己署名証明書が必要です。
+
+まだローカル認証局を作成していない場合
+```bash
+mkcert -install
+```
+
 プロジェクトルートに `.certificate` ディレクトリを作成し、そこに `localhost-cert.pem` と `localhost-key.pem` を配置してください。
 
-OpenSSL を使用して証明書を生成する例:
 ```bash
 mkdir .certificate
-openssl req -x509 -newkey rsa:2048 -keyout .certificate/localhost-key.pem -out .certificate/localhost-cert.pem -sha256 -days 365 -nodes -subj "/CN=localhost"
+mkcert -key-file .certificate/localhost-key.pem -cert-file .certificate/localhost-cert.pem localhost 127.0.0.1 ::1
 ```
-`docker-compose.yml` (もしあれば) で、この `.certificate` ディレクトリがコンテナ内の `/https` にマウントされるように設定されています。
+`docker-compose.yml`で、この `.certificate` ディレクトリがコンテナ内の `/https` にマウントされるように設定されています。
 環境変数 `SSL_CERT_PATH` と `SSL_KEY_PATH` でこれらのファイルのパスを指定します (Docker未使用時はホストOSの絶対パス、Docker使用時はコンテナ内のパス)。
 
 ### 4. データベースのセットアップ
