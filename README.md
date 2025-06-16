@@ -42,26 +42,11 @@ cd dotnet-auth-api-sample
 ```
 
 ### 2. 環境変数の設定
-プロジェクトルート（`dotnet-auth-api-sample` ディレクトリ）に `.env` ファイルを作成し、以下の内容を参考に設定します。
-`apps/api/.env.example` があればそれをコピーして編集してください。
-```env
-# JWT Settings
-JWT_SECRET="your-super-secret-jwt-key-at-least-32-characters-long" # 32文字以上のランダムな文字列
-JWT_ISSUER="your-api-issuer"
-JWT_AUDIENCE="your-api-audience"
-ACCESS_TOKEN_EXPIRE_SECONDS=900 # 15 minutes
-REFRESH_TOKEN_EXPIRE_SECONDS=604800 # 7 days
+`apps/api/.env.example` をコピーして`apps/api/.env`を作成し、内容を編集してください。
 
-# Redis
-REDIS_CONNECTION_STRING="localhost:6379"
-
-# SSL (開発用 - Docker Compose を使用する場合、パスはコンテナ内を指します)
-# SSL_CERT_PATH="/https/localhost-cert.pem"
-# SSL_KEY_PATH="/https/localhost-key.pem"
-```
 **注意:** `JWT_SECRET` は必ず推測困難な32文字以上のランダムな文字列に変更してください。
 
-### 3. 開発用SSL証明書の準備 (オプション)
+### 3. 開発用SSL証明書の準備
 HTTPSでローカル開発を行う場合、自己署名証明書が必要です。
 
 まだローカル認証局を作成していない場合
