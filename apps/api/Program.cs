@@ -55,12 +55,12 @@ builder.WebHost.ConfigureKestrel(options =>
 // .env ファイルから環境変数を読み込む (アプリケーションの早い段階で)
 Env.Load();
 
-// DbContextの登録 (例: インメモリデータベース)
-// 実際のアプリケーションでは、appsettings.jsonや環境変数から接続文字列を取得し、
-// 適切なデータベースプロバイダー (UseSqlServer, UseNpgsqlなど) を使用してください。
+// DbContextの登録
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-  // options.UseInMemoryDatabase("AuthApiDb") // インメモリデータベースを使用する場合
-  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? EnvConfig.GetString("DB_CONNECTION_STRING"))
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+    .EnableSensitiveDataLogging() // デバッグ用に有効化 (本番環境では無効化すること)
+    .EnableDetailedErrors() // 詳細なエラーメッセージを有効化 (本番環境では無効化すること)
+    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking) // パフォーマンス向上のためにトラッキングを無効化 (本番環境では有効化すること)
 );
 
 // Redis接続設定
