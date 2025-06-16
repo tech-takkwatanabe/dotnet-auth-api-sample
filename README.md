@@ -75,7 +75,7 @@ cd apps/api
 make init
 ```
 
-### 4. データベースのセットアップ
+### 5. データベースのセットアップ
 SQL Server インスタンスが実行されていることを確認してください。
 `apps/api` ディレクトリに移動し、Entity Framework Core のマイグレーションを実行してデータベーススキーマを作成します。
 ```bash
@@ -87,11 +87,3 @@ make migrate
 アプリケーション実行後、以下のURLにアクセスすると Swagger UI が表示され、APIの仕様確認とテストが可能です。
 
 **Swagger UI:** https://localhost:8443/swagger/index.html
-
-### OpenAPI 仕様ファイルの生成
-ローカルでAPIドキュメントファイル (`openapi.json`) を生成するには、以下のコマンドを実行します。
-```bash
-cd apps/api
-mkdir Docs
-curl -k https://localhost:8443/swagger/v1/swagger.json -o Docs/openapi.json
-```
