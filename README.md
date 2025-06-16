@@ -87,3 +87,7 @@ make migrate
 アプリケーション実行後、以下のURLにアクセスすると Swagger UI が表示され、APIの仕様確認とテストが可能です。
 
 **Swagger UI:** https://localhost:8443/swagger/index.html
+
+## 🚧 TBD
+
+apps/web以下はフロントエンド領域としています。
