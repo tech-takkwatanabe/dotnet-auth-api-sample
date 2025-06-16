@@ -45,9 +45,6 @@ cd dotnet-auth-api-sample
 プロジェクトルート（`dotnet-auth-api-sample` ディレクトリ）に `.env` ファイルを作成し、以下の内容を参考に設定します。
 `apps/api/.env.example` があればそれをコピーして編集してください。
 ```env
-# Database
-DB_CONNECTION_STRING="Server=localhost,1433;Database=AuthApiDb;User ID=sa;Password=Your_Password123;TrustServerCertificate=True;"
-
 # JWT Settings
 JWT_SECRET="your-super-secret-jwt-key-at-least-32-characters-long" # 32文字以上のランダムな文字列
 JWT_ISSUER="your-api-issuer"
