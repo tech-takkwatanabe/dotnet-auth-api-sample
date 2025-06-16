@@ -37,7 +37,7 @@ JWT (JSON Web Token) ベースの認証を実装し、ユーザー登録、ロ�
 
 ### 1. リポジトリのクローン
 ```bash
-git clone https://github.com/your-username/dotnet-auth-api-sample.git
+git clone https://github.com/tech-takkwatanabe/dotnet-auth-api-sample.git
 cd dotnet-auth-api-sample
 ```
 
