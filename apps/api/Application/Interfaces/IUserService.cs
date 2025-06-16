@@ -13,7 +13,7 @@ namespace Api.Application.Interfaces
      * @param id ユーザーID
      * @return *dto.UserDTO ユーザー情報 (現在はUserエンティティを返す想定)
      */
-    Task<UserEntity?> GetUserByUuidAsync(Uuid uuid); // メソッド名を変更して意図を明確化
+    Task<UserEntity?> GetUserByUuidAsync(Uuid uuid);
 
     /**
      * ユーザーUUIDからユーザー情報を取得する (JWTのsubクレームなど)
