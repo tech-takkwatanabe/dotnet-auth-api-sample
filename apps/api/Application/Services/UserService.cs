@@ -29,7 +29,7 @@ namespace Api.Application.Services
     /**
      * ユーザーIDからユーザー情報を取得する
      * @param id ユーザーID
-     * @return *dto.UserDTO ユーザー情報 (現在はUserエンティティを返す想定)
+     * @return UserEntity
      */
     public async Task<UserEntity?> GetUserByUuidAsync(DomainUuid uuid)
     {
@@ -39,7 +39,7 @@ namespace Api.Application.Services
     /**
      * ユーザーIDからユーザー情報を取得する
      * @param email メールアドレス
-     * @return *dto.UserDTO ユーザー情報 (現在はUserエンティティを返す想定)
+     * @return UserEntity
      */
     public async Task<UserEntity?> GetUserByEmailAsync(Email email)
     {
@@ -49,7 +49,7 @@ namespace Api.Application.Services
     /**
      * ユーザーUUIDからユーザー情報を取得する (JWTのsubクレームなど)
      * @param uuid UUID
-     * @return *dto.UserDTO ユーザー情報 (現在はUserエンティティを返す想定)
+     * @return UserEntity
      */
     public async Task<UserEntity?> GetUserBySubAsync(DomainUuid uuid)
     {
@@ -61,7 +61,7 @@ namespace Api.Application.Services
      * @param name ユーザー名
      * @param email メールアドレス
      * @param password パスワード
-     * @return error エラー (成功時はTask.CompletedTask, エラー時は例外をスローする想定)
+     * @return Name ユーザー名, Email メールアドレス
      */
     public async Task RegisterUserAsync(SignUpRequest request)
     {
