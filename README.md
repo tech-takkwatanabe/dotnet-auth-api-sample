@@ -43,6 +43,12 @@ cd dotnet-auth-api-sample
 
 ### 2. 環境変数の設定
 `apps/api/.env.example` をコピーして`apps/api/.env`を作成し、内容を編集してください。
+`USER_SECRET_ID`には以下のコマンドで生成した値をコピーしてください。
+
+```bash
+cd apps/api
+dotnet user-secrets init
+```
 
 **注意:** `JWT_SECRET` は必ず推測困難な32文字以上のランダムな文字列に変更してください。
 
@@ -63,27 +69,17 @@ mkcert -key-file .certificate/localhost-key.pem -cert-file .certificate/localhos
 `docker-compose.yml`で、この `.certificate` ディレクトリがコンテナ内の `/https` にマウントされるように設定されています。
 環境変数 `SSL_CERT_PATH` と `SSL_KEY_PATH` でこれらのファイルのパスを指定します (Docker未使用時はホストOSの絶対パス、Docker使用時はコンテナ内のパス)。
 
+### 4. コンテナ初期化
+```bash
+cd apps/api
+make init
+```
+
 ### 4. データベースのセットアップ
 SQL Server インスタンスが実行されていることを確認してください。
 `apps/api` ディレクトリに移動し、Entity Framework Core のマイグレーションを実行してデータベーススキーマを作成します。
 ```bash
-cd apps/api
-dotnet ef database update
-```
-
-### 5. アプリケーションの実行
-
-#### a) dotnet CLI を使用する場合:
-`apps/api` ディレクトリで以下を実行します。
-```bash
-dotnet run
-```
-APIは `http://localhost:8080` および `https://localhost:8443` (証明書設定時) で利用可能になります。
-
-#### b) Docker Compose を使用する場合 (推奨):
-プロジェクトルートに `docker-compose.yml` がある場合、以下を実行します。
-```bash
-docker-compose up --build
+make migrate
 ```
 
 ## 📄 APIドキュメント (Swagger)
