@@ -30,10 +30,9 @@ JWT (JSON Web Token) ベースの認証を実装し、ユーザー登録、ロ�
 ## 🚀 セットアップと実行
 
 ### 前提条件
-- [.NET SDK](https://dotnet.microsoft.com/download) (バージョンはプロジェクトファイルを参照)
-- [Docker](https://www.docker.com/) (SQL Server と Redis の実行に推奨)
-- SQL Server (ローカルまたはDocker)
-- Redis (ローカルまたはDocker)
+- [.NET SDK](https://dotnet.microsoft.com/download)
+- [Docker](https://www.docker.com/)
+- [mkcert](https://github.com/FiloSottile/mkcert)
 
 ### 1. リポジトリのクローン
 ```bash
