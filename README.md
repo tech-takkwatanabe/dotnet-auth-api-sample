@@ -27,6 +27,65 @@ JWT (JSON Web Token) ベースの認証を実装し、ユーザー登録、ロ�
 - Swashbuckle.AspNetCore (Swagger)
 - DotNetEnv
 
+## 📂 ディレクトリ構成
+
+```
+apps/api
+├── Api.csproj
+├── Api.http
+├── Application
+│   ├── Interfaces
+│   ├── Services
+│   └── UseCases
+├── appsettings.Development.json
+├── appsettings.json
+├── bin
+│   └── Debug
+├── Configuration
+│   ├── Const.cs
+│   └── EnvConfig.cs
+├── Controllers
+│   └── AuthController.cs
+├── Data
+│   ├── ApplicationDbContext.cs
+│   ├── ApplicationDbContextFactory.cs
+│   └── Migrations
+├── docker
+│   ├── data
+│   └── redis
+├── docker-compose.yml
+├── Dockerfile
+├── Docs
+│   └── openapi.json
+├── Domain
+│   ├── DTOs
+│   ├── Entities
+│   ├── Repositories
+│   └── VOs
+├── dotnet-auth-api-sample.sln
+├── Infrastructure
+│   ├── Middleware
+│   ├── Persistence
+│   ├── Security
+│   ├── Settings
+│   └── SwaggerFilters
+├── Makefile
+├── Models
+│   └── User.cs
+├── obj
+│   ├── Api.csproj.EntityFrameworkCore.targets
+│   ├── Api.csproj.nuget.dgspec.json
+│   ├── Api.csproj.nuget.g.props
+│   ├── Api.csproj.nuget.g.targets
+│   ├── Debug
+│   ├── project.assets.json
+│   └── project.nuget.cache
+├── Program.cs
+├── Properties
+│   └── launchSettings.json
+└── README.md
+```
+
 ## 🚀 セットアップと実行
 
 ### 前提条件
