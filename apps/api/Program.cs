@@ -73,8 +73,8 @@ builder.Services.Configure<JwtSettings>(options =>
   options.Key = EnvConfig.GetString("JWT_SECRET");
   options.Issuer = EnvConfig.GetString("JWT_ISSUER");
   options.Audience = EnvConfig.GetString("JWT_AUDIENCE");
-  options.AccessTokenExpirationSeconds = EnvConfig.GetInt("ACCESS_TOKEN_EXPIRE_SECONDS", 900);
-  options.RefreshTokenExpirationSeconds = EnvConfig.GetInt("REFRESH_TOKEN_EXPIRE_SECONDS", 3600);
+  options.AccessTokenExpirationSeconds = EnvConfig.GetInt("ACCESS_TOKEN_EXPIRE_SECONDS", 60 * 60 * 24);
+  options.RefreshTokenExpirationSeconds = EnvConfig.GetInt("REFRESH_TOKEN_EXPIRE_SECONDS", 60 * 60 * 24 * 7);
 });
 
 // 2. JWT UtilsをDIコンテナに登録
