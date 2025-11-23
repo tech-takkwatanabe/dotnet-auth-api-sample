@@ -10,8 +10,8 @@ COPY . .
 RUN dotnet build "Api.csproj" -c Debug -o /app/build
 
 # dotnet-efツールをインストール
-RUN dotnet tool install --global dotnet-ef
-ENV PATH="$PATH:/root/.dotnet/tools"
+RUN dotnet tool restore
+ENV PATH="$PATH:/root/.config/dotnet/tools"
 
 FROM build AS publish
 RUN dotnet publish "Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
